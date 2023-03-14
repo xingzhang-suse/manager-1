@@ -21,14 +21,32 @@ trait MySslConfiguration extends LazyLogging {
   // since we want non-default settings in this example we make a custom SSLContext available here
   implicit def sslContext: SSLContext = {
 
-    val password               = Array('n', 'e', 'u', 'v', 'e', 'c', 't', 'o', 'r')
-    val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
-    val trustManagerFactory    = TrustManagerFactory.getInstance("SunX509")
-    val keyManagerFactory      = KeyManagerFactory.getInstance("SunX509")
-    val ks: KeyStore           = KeyStore.getInstance("jks")
-    val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
-    val context                = SSLContext.getInstance("TLS")
     logger.info("Import manager's certificate and private key to manager's keystore")
+    val password                                 = Array('n', 'e', 'u', 'v', 'e', 'c', 't', 'o', 'r')
+    val jdkProvider: String                      = sys.env.getOrElse("JDK_PROVIDER", "")
+    var cf: CertificateFactory                   = null
+    var trustManagerFactory: TrustManagerFactory = null
+    var keyManagerFactory: KeyManagerFactory     = null
+    var ks: KeyStore                             = null
+    var keyFactory: KeyFactory                   = null
+    var context: SSLContext                      = null
+    if (jdkProvider.trim.nonEmpty) {
+      logger.info("JDK provider is {}", jdkProvider.trim)
+      cf = CertificateFactory.getInstance("X.509", jdkProvider.trim)
+      trustManagerFactory = TrustManagerFactory.getInstance("SunX509", jdkProvider.trim)
+      trustManagerFactory = TrustManagerFactory.getInstance("SunX509", jdkProvider.trim)
+      keyManagerFactory = KeyManagerFactory.getInstance("SunX509", jdkProvider.trim)
+      ks = KeyStore.getInstance("jks", jdkProvider.trim)
+      keyFactory = KeyFactory.getInstance("RSA", jdkProvider.trim)
+      context = SSLContext.getInstance("TLS", jdkProvider.trim)
+    } else {
+      trustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+      trustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+      keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+      ks = KeyStore.getInstance("jks")
+      keyFactory = KeyFactory.getInstance("RSA")
+      context = SSLContext.getInstance("TLS")
+    }
 
     val fCert: File                  = new File(newCert)
     val fKey: File                   = new File(newKey)
