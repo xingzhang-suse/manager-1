@@ -4,7 +4,7 @@ import java.io.{ BufferedInputStream, File, FileInputStream, FileNotFoundExcepti
 import java.security.cert.{ Certificate, CertificateFactory }
 import java.security.interfaces.RSAPrivateKey
 import java.security.spec.{ RSAPrivateCrtKeySpec, _ }
-import java.security.{ KeyFactory, KeyStore, PrivateKey, SecureRandom }
+import java.security.{ KeyFactory, KeyStore, PrivateKey, Provider, SecureRandom }
 import java.util.Base64
 
 import com.neu.core.CommonSettings.{ newCert, newKey }
@@ -16,37 +16,32 @@ import sun.security.util.DerInputStream
 import scala.collection.JavaConverters._
 
 trait MySslConfiguration extends LazyLogging {
-
   // if there is no SSLContext in scope implicitly the HttpServer uses the default SSLContext,
   // since we want non-default settings in this example we make a custom SSLContext available here
   implicit def sslContext: SSLContext = {
 
-    logger.info("Import manager's certificate and private key to manager's keystore")
+    logger.info("Import manager's certificate and private key to manager's keystore: 2")
     val password                                 = Array('n', 'e', 'u', 'v', 'e', 'c', 't', 'o', 'r')
-    val jdkProvider: String                      = sys.env.getOrElse("JDK_PROVIDER", "")
     var cf: CertificateFactory                   = null
     var trustManagerFactory: TrustManagerFactory = null
     var keyManagerFactory: KeyManagerFactory     = null
     var ks: KeyStore                             = null
     var keyFactory: KeyFactory                   = null
     var context: SSLContext                      = null
+    val jdkProvider: String                      = sys.env.getOrElse("JDK_PROVIDER", "")
     if (jdkProvider.trim.nonEmpty) {
-      logger.info("JDK provider is {}", jdkProvider.trim)
       cf = CertificateFactory.getInstance("X.509", jdkProvider.trim)
-      trustManagerFactory = TrustManagerFactory.getInstance("SunX509", jdkProvider.trim)
-      trustManagerFactory = TrustManagerFactory.getInstance("SunX509", jdkProvider.trim)
-      keyManagerFactory = KeyManagerFactory.getInstance("SunX509", jdkProvider.trim)
-      ks = KeyStore.getInstance("jks", jdkProvider.trim)
-      keyFactory = KeyFactory.getInstance("RSA", jdkProvider.trim)
-      context = SSLContext.getInstance("TLS", jdkProvider.trim)
     } else {
-      trustManagerFactory = TrustManagerFactory.getInstance("SunX509")
-      trustManagerFactory = TrustManagerFactory.getInstance("SunX509")
-      keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
-      ks = KeyStore.getInstance("jks")
-      keyFactory = KeyFactory.getInstance("RSA")
-      context = SSLContext.getInstance("TLS")
+      cf = CertificateFactory.getInstance("X.509")
     }
+    logger.info("JDK_PROVIDER: {}", jdkProvider)
+    logger.info("Algorithm of TrustManagerFactory: {}", TrustManagerFactory.getDefaultAlgorithm())
+    logger.info("Algorithm of KeyManagerFactory: {}", KeyManagerFactory.getDefaultAlgorithm())
+    trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+    keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+    ks = KeyStore.getInstance("jks")
+    keyFactory = KeyFactory.getInstance("RSA")
+    context = SSLContext.getInstance("TLS")
 
     val fCert: File                  = new File(newCert)
     val fKey: File                   = new File(newKey)
@@ -130,14 +125,17 @@ trait MySslConfiguration extends LazyLogging {
             new KeyStore.PasswordProtection(password)
           )
 
-          val keyStore = KeyStore.getInstance("jks")
+          // val keyStore = KeyStore.getInstance("jks")
           keyManagerFactory.init(ks, password)
-          trustManagerFactory.init(keyStore)
+          trustManagerFactory.init(ks)
 
           context.init(
             keyManagerFactory.getKeyManagers,
             trustManagerFactory.getTrustManagers,
-            new SecureRandom
+            if (jdkProvider.trim.nonEmpty)
+              SecureRandom.getInstance("DEFAULT", jdkProvider.trim)
+            else
+              new SecureRandom
           )
         }
         context
@@ -169,6 +167,27 @@ trait MySslConfiguration extends LazyLogging {
   }
 
   implicit val myEngineProvider = ServerSSLEngineProvider { engine =>
+    // engine.setEnabledCipherSuites(
+    //   Array(
+    //     "TLS_AES_128_GCM_SHA256",
+    //     "TLS_AES_256_GCM_SHA384",
+    //     "TLS_AES_128_CCM_SHA256",
+    //     "TLS_AES_128_CCM_8_SHA256",
+    //     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    //     "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    //     "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    //     "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+    //     "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    //     "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+    //     "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+    //     "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+    //     "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    //     "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+    //     "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"
+    //   )
+    // )
+    // engine.setEnabledProtocols(Array("TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"))
+    // engine
     engine.setEnabledCipherSuites(Array("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"))
     engine.setEnabledProtocols(Array("TLSv1.2"))
     engine
