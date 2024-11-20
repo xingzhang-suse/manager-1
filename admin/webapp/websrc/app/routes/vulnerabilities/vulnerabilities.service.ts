@@ -41,6 +41,7 @@ export class VulnerabilitiesService {
               total_records: 0,
               summary: {
                 count_distribution: {
+                  critical: 0,
                   high: 0,
                   medium: 0,
                   low: 0,
@@ -70,13 +71,14 @@ export class VulnerabilitiesService {
       this.vulnerabilitiesFilterService.activePage = 0;
     })
   );
-  imageMap!: Map<string, { high: number; medium: number; low: number }>;
-  hostMap!: Map<string, { high: number; medium: number; low: number }>;
-  topNodes!: [string, { high: number; medium: number; low: number }][];
-  topImages!: [string, { high: number; medium: number; low: number }][];
+  imageMap!: Map<string, { critical: number; high: number; medium: number; low: number }>;
+  hostMap!: Map<string, { critical: number; high: number; medium: number; low: number }>;
+  topNodes!: [string, { critical: number; high: number; medium: number; low: number }][];
+  topImages!: [string, { critical: number; high: number; medium: number; low: number }][];
   topCve!: Compliance[] | VulnerabilityAssetRaw[];
   gridApi!: GridApi;
   countDistribution!: {
+    critical: number;
     high: number;
     medium: number;
     low: number;
@@ -124,6 +126,7 @@ export class VulnerabilitiesService {
     this.topNodes = [];
     this.topImages = [];
     this.countDistribution = {
+      critical: 0,
       high: 0,
       medium: 0,
       low: 0,
@@ -140,6 +143,7 @@ export class VulnerabilitiesService {
 
   updateCountDistribution(filteredCis) {
     let countDistribution = {
+      critical: 0,
       high: 0,
       medium: 0,
       low: 0,
@@ -149,6 +153,7 @@ export class VulnerabilitiesService {
       container: 0,
     };
     filteredCis.forEach(cve => {
+      if (cve.severity === 'Critical') countDistribution.critical += 1;
       if (cve.severity === 'High') countDistribution.high += 1;
       if (cve.severity === 'Medium') countDistribution.medium += 1;
       if (cve.severity === 'Low') countDistribution.low += 1;

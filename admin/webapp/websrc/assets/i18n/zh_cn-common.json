@@ -1262,6 +1262,7 @@
       "IMAGE": "镜像",
       "STATUS": "扫描状态",
       "RESULT": "结果",
+      "CRITICAL": "极危",
       "HIGH": "高危",
       "MEDIUM": "中危",
       "SEVERITY": "严重程度",

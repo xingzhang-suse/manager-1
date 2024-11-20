@@ -60,7 +60,7 @@ object PolicyJsonProtocol extends DefaultJsonProtocol with LazyLogging {
 
   given ipAddressFormat: RootJsonFormat[IpAddress]                               = jsonFormat3(IpAddress.apply)
   given protoPortFormat: RootJsonFormat[ProtoPort]                               = jsonFormat4(ProtoPort.apply)
-  given scanSummaryFormat: RootJsonFormat[ScanSummary]                           = jsonFormat11(ScanSummary.apply)
+  given scanSummaryFormat: RootJsonFormat[ScanSummary]                           = jsonFormat13(ScanSummary.apply)
   given scannedWorkloadChildren2Format: RootJsonFormat[ScannedWorkloadChildren2] =
     jsonFormat21(ScannedWorkloadChildren2.apply)
   given scannedWorkloads2Format: RootJsonFormat[ScannedWorkloads2]               = jsonFormat22(
@@ -198,8 +198,9 @@ object PolicyJsonProtocol extends DefaultJsonProtocol with LazyLogging {
   def convertScannedWorkloads2(workloadsWrap: ScannedWorkloadsWrap2): ScannedWorkloadsWrap2 = {
     val convertedWorkloads = workloadsWrap.workloads.map { workload =>
 
-      var high   = workload.scan_summary.high;
-      var medium = workload.scan_summary.medium;
+      var critical = workload.scan_summary.critical;
+      var high     = workload.scan_summary.high;
+      var medium   = workload.scan_summary.medium;
       workload.children.foreach { child =>
         high += child.scan_summary.high
         medium += child.scan_summary.medium
@@ -208,8 +209,10 @@ object PolicyJsonProtocol extends DefaultJsonProtocol with LazyLogging {
       workload.copy(
         scan_summary = ScanSummary(
           workload.scan_summary.status,
+          workload.scan_summary.critical,
           workload.scan_summary.high,
           workload.scan_summary.medium,
+          Option(critical),
           Option(high),
           Option(medium),
           workload.scan_summary.result,
@@ -230,8 +233,9 @@ object PolicyJsonProtocol extends DefaultJsonProtocol with LazyLogging {
   def convertWorkloadV2(workloadsWrapV2: WorkloadsWrapV2): WorkloadsWrapV2 = {
     val convertedWorkloads = workloadsWrapV2.workloads.map { workload =>
 
-      var high   = workload.security.scan_summary.high;
-      var medium = workload.security.scan_summary.medium;
+      var critical = workload.security.scan_summary.critical;
+      var high     = workload.security.scan_summary.high;
+      var medium   = workload.security.scan_summary.medium;
       workload.children.foreach { child =>
         high += child.security.scan_summary.high
         medium += child.security.scan_summary.medium
@@ -240,8 +244,10 @@ object PolicyJsonProtocol extends DefaultJsonProtocol with LazyLogging {
       val wlSecurity = workload.security.copy(
         scan_summary = ScanSummary(
           workload.security.scan_summary.status,
+          workload.security.scan_summary.critical,
           workload.security.scan_summary.high,
           workload.security.scan_summary.medium,
+          Option(critical),
           Option(high),
           Option(medium),
           workload.security.scan_summary.result,

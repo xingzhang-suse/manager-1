@@ -21,19 +21,19 @@ export class AssetsViewReportComponent implements OnInit {
     if (this.reportPage === 'vulnerabilities') {
       console.log('this.masterGrids', this.masterGrids);
       this.masterGrids[0] = this.masterGrids[0].sort((a, b) => {
-        return b.high + b.medium - (a.high + a.medium);
+        return b.critical + b.high + b.medium - (a.critical + a.high + a.medium);
       });
 
       this.masterGrids[1] = this.masterGrids[1].sort((a, b) => {
-        return b.high + b.medium - (a.high + a.medium);
+        return b.critical + b.high + b.medium - (a.critical + a.high + a.medium);
       });
 
       this.masterGrids[2] = this.masterGrids[2].sort((a, b) => {
-        return b.high + b.medium - (a.high + a.medium);
+        return b.critical + b.high + b.medium - (a.critical + a.high + a.medium);
       });
 
       this.masterGrids[3] = this.masterGrids[3].sort((a, b) => {
-        return b.high + b.medium - (a.high + a.medium);
+        return b.critical + b.high + b.medium - (a.critical + a.high + a.medium);
       });
     } else {
       this.masterGrids[0] = this.masterGrids[0].sort((a, b) => {

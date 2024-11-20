@@ -888,6 +888,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.criticalVulsMap.getOrElse(DISCOVER, 0),
                     x.highVulsMap.getOrElse(DISCOVER, 0),
                     x.medVulsMap.getOrElse(DISCOVER, 0)
                   )
@@ -898,6 +899,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.criticalVulsMap.getOrElse(MONITOR, 0),
                     x.highVulsMap.getOrElse(MONITOR, 0),
                     x.medVulsMap.getOrElse(MONITOR, 0)
                   )
@@ -908,6 +910,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.criticalVulsMap.getOrElse(PROTECT, 0),
                     x.highVulsMap.getOrElse(PROTECT, 0),
                     x.medVulsMap.getOrElse(PROTECT, 0)
                   )
@@ -918,6 +921,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.criticalVulsMap.getOrElse(QUARANTINED, 0),
                     x.highVulsMap.getOrElse(QUARANTINED, 0),
                     x.medVulsMap.getOrElse(QUARANTINED, 0)
                   )
@@ -928,6 +932,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.nodeCriticalVuls,
                     x.nodeHighVuls,
                     x.nodeMedVuls
                   )
@@ -938,6 +943,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
               case Right(x) =>
                 Right(
                   VulnerabilityCount(
+                    x.platformCriticalVuls,
                     x.platformHighVuls,
                     x.platformMedVuls
                   )
@@ -1290,14 +1296,17 @@ class DashboardService()(implicit executionContext: ExecutionContext)
   private lazy val getVulPlatformOutput = (
     vulPlatforms: VulnerablePlatforms
   ) => {
-    var platformHighVuls = 0
-    var platformMedVuls  = 0
+    var platformCriticalVuls = 0
+    var platformHighVuls     = 0
+    var platformMedVuls      = 0
     vulPlatforms.platforms.foreach { vulPlatforms =>
+      platformCriticalVuls += vulPlatforms.critical
       platformHighVuls += vulPlatforms.high
       platformMedVuls += vulPlatforms.medium
     }
 
     VulPlatformOutput(
+      platformCriticalVuls,
       platformHighVuls,
       platformMedVuls
     )
@@ -1306,14 +1315,17 @@ class DashboardService()(implicit executionContext: ExecutionContext)
   private lazy val getVulNodeOutput = (
     vulNodes: VulnerableNodeEndpoint
   ) => {
-    var nodeHighVuls = 0
-    var nodeMedVuls  = 0
+    var nodeCriticalVuls = 0
+    var nodeHighVuls     = 0
+    var nodeMedVuls      = 0
     vulNodes.hosts.foreach { node =>
+      nodeCriticalVuls += node.scan_summary.fold(0)(scan_summary => scan_summary.critical)
       nodeHighVuls += node.scan_summary.fold(0)(scan_summary => scan_summary.high)
       nodeMedVuls += node.scan_summary.fold(0)(scan_summary => scan_summary.medium)
     }
 
     VulNodeOutput(
+      nodeCriticalVuls,
       nodeHighVuls,
       nodeMedVuls,
       vulNodes.hosts.length
@@ -1329,6 +1341,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     domain: String,
     serviceMaps: ServiceMaps
   ) => {
+    val criticalVulsMap               = collection.mutable.Map[String, Int]()
     val highVulsMap                   = collection.mutable.Map[String, Int]()
     val medVulsMap                    = collection.mutable.Map[String, Int]()
     var totalScannedPodsWithoutSystem = 0
@@ -1351,6 +1364,12 @@ class DashboardService()(implicit executionContext: ExecutionContext)
 
     logger.info("vulContainersByDomain: {}", vulContainersByDomain)
     vulContainersByDomain.foreach { container =>
+      criticalVulsMap += (
+        container.state -> (
+          criticalVulsMap.getOrElse(container.state, 0)
+          + container.scan_summary.fold(0)(scan_summary => scan_summary.critical)
+        )
+      )
       highVulsMap += (
         container.state -> (
           highVulsMap.getOrElse(container.state, 0)
@@ -1370,6 +1389,12 @@ class DashboardService()(implicit executionContext: ExecutionContext)
           .nonEmpty
       ) {
         container.children.get.filter(child => child.state != "exit").foreach { child =>
+          criticalVulsMap += (
+            container.state -> (
+              criticalVulsMap.getOrElse(container.state, 0)
+              + child.scan_summary.fold(0)(scan_summary => scan_summary.critical)
+            )
+          )
           highVulsMap += (
             container.state -> (
               highVulsMap.getOrElse(container.state, 0)
@@ -1387,6 +1412,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     }
 
     VulContainerOutput(
+      criticalVulsMap.toMap,
       highVulsMap.toMap,
       medVulsMap.toMap,
       vulContainersByDomain.length,
@@ -2296,6 +2322,7 @@ class DashboardService()(implicit executionContext: ExecutionContext)
       val top5Workloads = vulContainersByDomain.map { container =>
         val vulnerabilityNum = container.children.fold(
           (
+            container.scan_summary.fold(0)(scan_summary => scan_summary.critical),
             container.scan_summary.fold(0)(scan_summary => scan_summary.high),
             container.scan_summary.fold(0)(scan_summary => scan_summary.medium)
           )
@@ -2303,21 +2330,25 @@ class DashboardService()(implicit executionContext: ExecutionContext)
           children
             .filter(child => child.state != "exit")
             .foldLeft(
+              container.scan_summary.fold(0)(scan_summary => scan_summary.critical),
               container.scan_summary.fold(0)(scan_summary => scan_summary.high),
               container.scan_summary.fold(0)(scan_summary => scan_summary.medium)
             ) { (container, child) =>
               (
                 container._1 + child.scan_summary
-                  .fold(0)(scan_summary => scan_summary.high),
+                  .fold(0)(scan_summary => scan_summary.critical),
                 container._2 + child.scan_summary
+                  .fold(0)(scan_summary => scan_summary.high),
+                container._3 + child.scan_summary
                   .fold(0)(scan_summary => scan_summary.medium)
               )
             }
         )
 
         val workload = container.copy(
-          high4Dashboard = Some(vulnerabilityNum._1),
-          medium4Dashboard = Some(vulnerabilityNum._2)
+          critical4Dashboard = Some(vulnerabilityNum._1),
+          high4Dashboard = Some(vulnerabilityNum._2),
+          medium4Dashboard = Some(vulnerabilityNum._3)
         )
         workload
       }
@@ -2326,6 +2357,11 @@ class DashboardService()(implicit executionContext: ExecutionContext)
             .fold(0)(medium => medium)
         )
         .sortWith(_.high4Dashboard.fold(0)(high => high) > _.high4Dashboard.fold(0)(high => high))
+        .sortWith(
+          _.critical4Dashboard.fold(0)(critical => critical) > _.critical4Dashboard.fold(0)(
+            critical => critical
+          )
+        )
         .filterNot { workloads =>
           workloads.high4Dashboard.fold(0)(high => high) == 0 &&
           workloads.medium4Dashboard.fold(0)(medium => medium) == 0

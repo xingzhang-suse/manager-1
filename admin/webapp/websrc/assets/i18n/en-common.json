@@ -1262,6 +1262,7 @@
       "IMAGE": "Image",
       "STATUS": "Scan Status",
       "RESULT": "Result",
+      "CRITICAL": "Critical",
       "HIGH": "High",
       "MEDIUM": "Medium",
       "SEVERITY": "Severity",

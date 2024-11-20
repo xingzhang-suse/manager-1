@@ -23,7 +23,12 @@ export type VulQueryPublishedTimeOption = 'all' | 'before' | 'after';
 
 export type VulQueryPackageTypeOption = 'all' | 'withfix' | 'withoutfix';
 
-export type VulQuerySeverityTypeOption = 'all' | 'high' | 'medium' | 'low';
+export type VulQuerySeverityTypeOption =
+  | 'all'
+  | 'critical'
+  | 'high'
+  | 'medium'
+  | 'low';
 
 export type VulQueryScoreTypeOption = 'v2' | 'v3';
 

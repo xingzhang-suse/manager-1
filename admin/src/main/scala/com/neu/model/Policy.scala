@@ -110,8 +110,10 @@ case class RuleConfigData(config: RuleConfig, replicate: Option[Boolean])
 
 case class ScanSummary(
   status: String,
+  critical: Int,
   high: Int,
   medium: Int,
+  hidden_critical: Option[Int],
   hidden_high: Option[Int],
   hidden_medium: Option[Int],
   result: String,

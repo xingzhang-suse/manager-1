@@ -144,6 +144,7 @@ export interface Image {
   digest: string;
   domain: string;
   envs: string[];
+  critical: number;
   high: number;
   image_id: string;
   labels: {};

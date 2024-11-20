@@ -666,6 +666,7 @@ export const parseExposureHierarchicalData = (
 
   Object.entries(groupedExposure).forEach(([k, v]) => {
     let applicationSet = new Set<string>();
+    let total_critical_vuls_by_service = 0;
     let total_high_vuls_by_service = 0;
     let total_medium_vuls_by_service = 0;
     v.forEach(child => {
@@ -679,6 +680,7 @@ export const parseExposureHierarchicalData = (
           applicationSet.add(port as any);
         });
       }
+      total_critical_vuls_by_service += child.critical;
       total_high_vuls_by_service += child.high;
       total_medium_vuls_by_service += child.medium;
     });
@@ -691,6 +693,7 @@ export const parseExposureHierarchicalData = (
       bytes: 0,
       sessions: 0,
       severity: '',
+      critical: total_critical_vuls_by_service,
       high: total_high_vuls_by_service,
       medium: total_medium_vuls_by_service,
       policy_action: v[0].policy_action,
