@@ -130,11 +130,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private getBasicData = (isRefeshing = false) => {
     if (!isRefeshing) {
-      const response = this.activatedRoute.snapshot.data['basicData'];
-      this.handleBasicData(response);
+      const responseNew = this.activatedRoute.snapshot.data['basicDataNew'];
+      this.handleBasicData(responseNew);
     } else {
       this.dashboardService
-        .getBasicData(GlobalVariable.user?.global_permissions.length > 0)
+        .getScoreDataNew(
+          GlobalVariable.user?.global_permissions.length > 0,
+          null
+        )
         .subscribe(this.handleBasicData);
     }
   };

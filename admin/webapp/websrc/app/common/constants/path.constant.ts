@@ -79,6 +79,7 @@ export class PathConstant {
   public static GROUP_LIST_URL = 'group-list'; //policy
   public static AUDIT_URL = 'audit'; //events
   public static DASHBOARD_SCORES_URL = 'dashboard/scores2'; //dashboard
+  public static DASHBOARD_SCORES_URL_NEW = 'dashboard/scores'; //dashboard
   public static DASHBOARD_DETAILS_URL = 'dashboard/details'; //dashboard
   public static DASHBOARD_NOTIFICATIONS_URL = 'dashboard/notifications2'; //dashboard
   public static SECURITY_EVENTS_URL_2 = 'security-events2'; //events

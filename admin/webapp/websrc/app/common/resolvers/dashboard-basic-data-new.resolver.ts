@@ -11,15 +11,16 @@ import { Observable, of } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class DashboardBasicDataResolver implements Resolve<any> {
+export class DashboardBasicDataNewResolver implements Resolve<any> {
   constructor(private dashboardService: DashboardService) {}
 
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<any> {
-    return this.dashboardService.getBasicData(
-      GlobalVariable.user?.global_permissions.length > 0
+    return this.dashboardService.getScoreDataNew(
+      GlobalVariable.user?.global_permissions.length > 0,
+      null
     );
   }
 }

@@ -716,6 +716,10 @@ case class RiskScoreMetricsCVE(
   host_cves: Int
 )
 
+case class MetricsWrap(
+  metrics: Metrics
+)
+
 case class Metrics(
   platform: String,
   kube_version: String,
@@ -1014,6 +1018,10 @@ object DashboardJsonProtocol extends DefaultJsonProtocol with LazyLogging {
   given multiClusterSummaryFormat: RootJsonFormat[MultiClusterSummary]         = jsonFormat2(
     MultiClusterSummary.apply
   )
+  MetricsWrap
+  given metricsWrapFormat: RootJsonFormat[MetricsWrap]                         = jsonFormat1(
+    MetricsWrap.apply
+  )
 
   def jsonToViolationsEndpointData(endpointData: String): ViolationEndpointData =
     endpointData.parseJson
@@ -1105,6 +1113,9 @@ object DashboardJsonProtocol extends DefaultJsonProtocol with LazyLogging {
 
   def internalSystemDataToJson(internalSystemData: InternalSystemData): String =
     internalSystemData.toJson.compactPrint
+
+  def metricsWrapDataToJson(metricsWraData: MetricsWrap): String =
+    metricsWraData.toJson.compactPrint
 
   def threatsToSecurityEvents: (Array[ThreatDetails], ThreatMajor, Int) => SecurityEvent =
     (threatDetails: Array[ThreatDetails], threatMajor: ThreatMajor, i: Int) => {

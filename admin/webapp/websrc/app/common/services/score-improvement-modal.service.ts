@@ -25,7 +25,7 @@ export class ScoreImprovementModalService {
   template$ = this.templateSubject$.asObservable();
   scoreInfo!: InternalSystemInfo;
   get score() {
-    return this.scoreInfo.score.securityRiskScore;
+    return this.scoreInfo.security_scores.security_risk_score;
   }
 
   constructor(private dashboardHttpService: DashboardHttpService) {}
@@ -39,7 +39,7 @@ export class ScoreImprovementModalService {
   }
 
   newMetrics() {
-    return Object.assign({}, this.scoreInfo.header_data);
+    return Object.assign({}, this.scoreInfo.metrics);
   }
 
   getScores(isGlobalUser: boolean, domain: any) {
@@ -48,13 +48,9 @@ export class ScoreImprovementModalService {
 
   calculateScoreData(
     metrics: Metrics,
-    isGlobalUser: boolean,
-    totalRunningPods: number
   ) {
     return this.dashboardHttpService.patchScores(
-      metrics,
-      isGlobalUser,
-      totalRunningPods
+      {metrics: metrics},
     );
   }
 

@@ -31,6 +31,10 @@ export class DashboardService {
     return this.dashboardHttpService.getScores(isGlobalUser, domain).pipe();
   };
 
+  getScoreDataNew = (isGlobalUser: boolean, domain: string | null) => {
+    return this.dashboardHttpService.getScoresNew(isGlobalUser, domain).pipe();
+  };
+
   getDashboardSecurityEvent = (domain?: string) => {
     return this.dashboardHttpService
       .getDashboardSecurityEventData(domain)
@@ -51,14 +55,6 @@ export class DashboardService {
 
   getIpGeoInfo = (ipList: Array<string>) => {
     return GlobalVariable.http.patch(PathConstant.IP_GEO_URL, ipList).pipe();
-  };
-
-  getBasicData = (isGlobalUser: boolean) => {
-    if (!GlobalVariable.hasInitializedSummary) {
-      console.warn('Summary uninitialized');
-    }
-
-    return this.getScoreData(isGlobalUser, null);
   };
 
   getDomainReportData = (isGlobalUser: boolean, domain: string) => {

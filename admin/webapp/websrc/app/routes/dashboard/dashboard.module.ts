@@ -16,7 +16,7 @@ import { DashboardPrintableReportComponent } from './dashboard-printable-report/
 import { ReportByNamespaceModalComponent } from './report-by-namespace-modal/report-by-namespace-modal.component';
 import { ExposedServicePodGridModule } from '@components/exposed-service-pod-grid/exposed-service-pod-grid.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { DashboardBasicDataResolver } from '@common/resolvers/dashboard-basic-data.resolver';
+import { DashboardBasicDataNewResolver } from '@common/resolvers/dashboard-basic-data-new.resolver';
 import { DashboardSecurityEventsResolver } from '@common/resolvers/dashboard-security-events.resolver';
 
 const routes: Routes = [
@@ -24,7 +24,7 @@ const routes: Routes = [
     path: '',
     component: DashboardComponent,
     resolve: {
-      basicData: DashboardBasicDataResolver,
+      basicDataNew: DashboardBasicDataNewResolver,
       securityEvents: DashboardSecurityEventsResolver,
     },
   },

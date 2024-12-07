@@ -173,39 +173,39 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     }
   }
 
-  def getScore2(tokenId: String, isGlobalUser: String, domain: Option[String]): Route = complete {
-    try {
-      val url                   = domain.fold(s"${baseClusterUri(tokenId)}/internal/system") { domain =>
-        if (domain == "") s"${baseClusterUri(tokenId)}/internal/system"
-        else s"${baseClusterUri(tokenId)}/internal/system?f_domain=$domain"
-      }
-      logger.info("Url: {}", url)
-      val internalSystemDataRes = RestClient.requestWithHeaderDecode(
-        url,
-        HttpMethods.GET,
-        "",
-        tokenId
-      )
-      val internalSystemData    = jsonToInternalSystemData(
-        Await.result(internalSystemDataRes, RestClient.waitingLimit.seconds)
-      )
-      logger.info("internalSystemData: {}", internalSystemData)
-      ScoreOutput2(
-        getScore2(internalSystemData.metrics, None, false, isGlobalUser == "true"),
-        internalSystemData.metrics,
-        internalSystemData.ingress,
-        internalSystemData.egress
-      )
-    } catch {
-      case NonFatal(e) =>
-        RestClient.handleError(
-          timeOutStatus,
-          authenticationFailedStatus,
-          serverErrorStatus,
-          e
-        )
-    }
-  }
+  // def getScore2(tokenId: String, isGlobalUser: String, domain: Option[String]): Route = complete {
+  //   try {
+  //     val url                   = domain.fold(s"${baseClusterUri(tokenId)}/internal/system") { domain =>
+  //       if (domain == "") s"${baseClusterUri(tokenId)}/internal/system"
+  //       else s"${baseClusterUri(tokenId)}/internal/system?f_domain=$domain"
+  //     }
+  //     logger.info("Url: {}", url)
+  //     val internalSystemDataRes = RestClient.requestWithHeaderDecode(
+  //       url,
+  //       HttpMethods.GET,
+  //       "",
+  //       tokenId
+  //     )
+  //     val internalSystemData    = jsonToInternalSystemData(
+  //       Await.result(internalSystemDataRes, RestClient.waitingLimit.seconds)
+  //     )
+  //     logger.info("internalSystemData: {}", internalSystemData)
+  //     ScoreOutput2(
+  //       getScore2(internalSystemData.metrics, None, false, isGlobalUser == "true"),
+  //       internalSystemData.metrics,
+  //       internalSystemData.ingress,
+  //       internalSystemData.egress
+  //     )
+  //   } catch {
+  //     case NonFatal(e) =>
+  //       RestClient.handleError(
+  //         timeOutStatus,
+  //         authenticationFailedStatus,
+  //         serverErrorStatus,
+  //         e
+  //       )
+  //   }
+  // }
 
   def updateScore2(
     tokenId: String,
@@ -534,534 +534,28 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     }
   }
 
-  def queryScore(tokenId: String, isGlobalUser: Option[String], scoreInput: ScoreInput): Route =
+  def queryScore(tokenId: String, metricsData: MetricsWrap): Route =
     complete {
-      try
-        getScore(scoreInput, isGlobalUser.getOrElse("true") == "true")
-      catch {
-        case NonFatal(e) =>
-          if (
-            e.getMessage.contains("Status: 408") || e.getMessage.contains(
-              "Status: 401"
-            )
-          ) {
-            (StatusCodes.RequestTimeout, "Session expired!")
-          } else {
-            (StatusCodes.InternalServerError, "Internal server error")
-          }
-      }
+      RestClient.httpRequestWithHeader(
+        s"${baseClusterUri(tokenId)}/system/score/metrics",
+        HttpMethods.POST,
+        metricsWrapDataToJson(metricsData),
+        tokenId
+      )
     }
 
   def getScore(tokenId: String, isGlobalUser: Option[String], domain: Option[String]): Route =
     complete {
-      try {
-        val domainVal     = domain.getOrElse("")
-        val query4Domain1 =
-          if (domainVal.isEmpty) ""
-          else s"?f_domain=${UrlEscapers.urlFragmentEscaper().escape(domainVal)}"
-        val query4Domain2 =
-          if (domainVal.isEmpty) ""
-          else s"&f_domain=${UrlEscapers.urlFragmentEscaper().escape(domainVal)}"
-        val startTime     = new DateTime()
-        logger.info("dashboard scores Start: {}", startTime)
-
-        /*========================================================================================
-            Pull data from Controller's APIs
-         ========================================================================================*/
-        val vulNodesRes       = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/host?Estart=0&limit=0$query4Domain2",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val servicesRes       = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/group?view=pod&scope=local$query4Domain2",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val policiesRes       = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/policy/rule$query4Domain1",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val containersRes     = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/workload?view=pod",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val vulPlatformsRes   = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/scan/platform$query4Domain1",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val conversationsRes  = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/conversation$query4Domain1",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val autoScanConfigRes = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/scan/config",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val systemConfigRes   = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/system/config",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val admissionRuleRes  = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/admission/rules",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-        val admissionStateRes = RestClient.requestWithHeaderDecode(
-          s"${baseClusterUri(tokenId)}/admission/state",
-          HttpMethods.GET,
-          "",
-          tokenId,
-          DASHBOARD
-        )
-
-        /*========================================================================================
-            Asynchronously get json response from APIs
-         ========================================================================================*/
-        val dashboardRes: Future[
-          (
-            String,
-            String,
-            String,
-            String,
-            String,
-            String,
-            String,
-            String,
-            String,
-            String
-          )
-        ] =
-          for {
-            vulNodes       <- vulNodesRes.recoverWith { case e: Exception =>
-                                handleScanHostException(e)
-                              }
-            services       <- servicesRes.recoverWith { case e: Exception =>
-                                handleServiceException(e)
-                              }
-            policies       <- policiesRes.recoverWith { case e: Exception =>
-                                handlePolicyException(e)
-                              }
-            conversations  <- conversationsRes.recoverWith { case e: Exception =>
-                                handleConversationException(e)
-                              }
-            vulPlatforms   <- vulPlatformsRes.recoverWith { case e: Exception =>
-                                handleScanPlatformException(e)
-                              }
-            systemConfig   <- systemConfigRes.recoverWith { case e: Exception =>
-                                handleSystemConfigException(e)
-                              }
-            containers     <- containersRes.recoverWith { case e: Exception =>
-                                handleWorkloadException(e)
-                              }
-            admissionRule  <- admissionRuleRes.recoverWith { case e: Exception =>
-                                handleAdmissionRuleException(e)
-                              }
-            autoScanConfig <- autoScanConfigRes.recoverWith { case e: Exception =>
-                                handleAutoScanConfigException(e)
-                              }
-            admissionState <- admissionStateRes.recoverWith { case e: Exception =>
-                                handleAdmissionStateException(e)
-                              }
-          } yield (
-            vulNodes,
-            services,
-            policies,
-            conversations,
-            vulPlatforms,
-            systemConfig,
-            containers,
-            admissionRule,
-            autoScanConfig,
-            admissionState
-          )
-
-        val dashboard: (
-          String,
-          String,
-          String,
-          String,
-          String,
-          String,
-          String,
-          String,
-          String,
-          String
-        ) =
-          Await.result(dashboardRes, RestClient.waitingLimit.seconds)
-
-        val endTimeAPI           = new DateTime()
-        logger.info("Dashboard scores - Multiple API call end: {}", endTimeAPI)
-        logger.info(
-          "Dashboard scores - Multiple API call duration: {}",
-          endTimeAPI.getMillis - startTime.getMillis
-        )
-        /*========================================================================================
-            Parse json response into object
-         ========================================================================================*/
-        val calculationStartTime = new DateTime()
-        logger.info("Dashboard scores - Calculation Start: {}", calculationStartTime)
-
-        val vulNodes       = jsonToVulnerableNodeEndpoint(dashboard._1)
-        val services       = jsonToServiceStatesIn(dashboard._2)
-        val policies       = jsonToApplicationsInPolicyWrap(dashboard._3)
-        val conversations  = jsonToGraphData(dashboard._4)
-        val vulPlatforms   = jsonToVulnerablePlatforms(dashboard._5)
-        val systemConfig   = jsonToSystemConfig4DashboardWrap(dashboard._6)
-        val containers     = jsonToWorkloadsWrap(dashboard._7)
-        val admissionRule  = jsonToAdmissionRulesWrap(dashboard._8)
-        val autoScanConfig = jsonToAutoScanConfig(dashboard._9)
-        val admissionState = jsonToAdmissionStateWrap(dashboard._10)
-        val autoScan       =
-          if (autoScanConfig.error.isDefined) {
-            Left(autoScanConfig.error.get)
-          } else {
-            Right(getAutoScan(autoScanConfig))
-          }
-
-        val domains = if (containers.error.isDefined) {
-          Left(containers.error.get)
-        } else {
-          Right(
-            getDomains(containers)
-          )
-        }
-
-        val policyOutput =
-          if (policies.error.isDefined) {
-            Left(policies.error.get)
-          } else {
-            Right(getPolicyOutput(policies))
-          }
-
-        val serviceMaps =
-          if (services.error.isDefined) {
-            Left(services.error.get)
-          } else {
-            policyOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) => Right(getServiceMaps(services, x.groupSet))
-            }
-          }
-
-        val runningContainers =
-          if (containers.error.isDefined) {
-            Left(containers.error.get)
-          } else {
-            serviceMaps match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  if (domainVal.isEmpty)
-                    containers.workloads
-                      .filter((workload: Workload) =>
-                        workload.state != "exit" && x.serviceMap
-                          .contains(s"nv.${workload.service}")
-                      )
-                  else
-                    containers.workloads
-                      .filter((workload: Workload) =>
-                        workload.state != "exit" && workload.domain == domainVal && x.serviceMap
-                          .contains(s"nv.${workload.service}")
-                      )
-                )
-            }
-          }
-
-        val totalRunningPods =
-          runningContainers match {
-            case Right(x) => Right(x.length)
-            case Left(x)  => Left(x)
-          }
-
-        val runningContainersOutput =
-          runningContainers match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              serviceMaps match {
-                case Left(y)  => Left(y)
-                case Right(y) => Right(getRunningContainersOutput(x, y))
-              }
-          }
-
-        val hasPrivilegedContainer =
-          runningContainersOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) => Right(x.hasPrivilegedContainer)
-          }
-
-        val hasRunAsRoot =
-          runningContainersOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) => Right(x.hasRunAsRoot)
-          }
-
-        val vulContainerOutput =
-          if (containers.error.isDefined) {
-            Left(containers.error.get)
-          } else {
-            serviceMaps match {
-              case Left(x)  => Left(x)
-              case Right(x) => Right(getVulContainerOutput(containers, domainVal, x))
-            }
-          }
-
-        val vulNodeOutput = if (vulNodes.error.isDefined) {
-          Left(vulNodes.error.get)
-        } else {
-          Right(getVulNodeOutput(vulNodes))
-        }
-
-        val vulPlatformOutput = if (vulPlatforms.error.isDefined) {
-          Left(vulPlatforms.error.get)
-        } else {
-          Right(getVulPlatformOutput(vulPlatforms))
-        }
-
-        val servicesOutput =
-          serviceMaps match {
-            case Left(x)  => Left(x)
-            case Right(x) => Right(x.groups)
-          }
-
-        val conversationsOutput =
-          if (conversations.error.isDefined) {
-            Left(conversations.error.get)
-          } else {
-            runningContainersOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                serviceMaps match {
-                  case Left(y)  => Left(y)
-                  case Right(y) =>
-                    Right(getConversationsOutput(conversations.conversations, x, y))
-                }
-            }
-          }
-
-        val hasAdmissionRules =
-          if (admissionRule.error.isDefined) {
-            Left(admissionRule.error.get)
-          } else if (admissionState.error.isDefined) {
-            Left(admissionState.error.get)
-          } else if (vulPlatforms.error.isDefined) {
-            Left(vulPlatforms.error.get)
-          } else {
-            Right(getHasAdmissionRules(admissionRule, admissionState, vulPlatforms))
-          }
-
-        val isNewServiceDiscover =
-          if (systemConfig.error.isDefined) {
-            Left(systemConfig.error.get)
-          } else {
-            Right(getIsNewServiceDiscover(systemConfig))
-          }
-
-        val scoreInput = ScoreInput(
-          VulnerabilityExploitRisk(
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.highVulsMap.getOrElse(DISCOVER, 0),
-                    x.medVulsMap.getOrElse(DISCOVER, 0)
-                  )
-                )
-            },
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.highVulsMap.getOrElse(MONITOR, 0),
-                    x.medVulsMap.getOrElse(MONITOR, 0)
-                  )
-                )
-            },
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.highVulsMap.getOrElse(PROTECT, 0),
-                    x.medVulsMap.getOrElse(PROTECT, 0)
-                  )
-                )
-            },
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.highVulsMap.getOrElse(QUARANTINED, 0),
-                    x.medVulsMap.getOrElse(QUARANTINED, 0)
-                  )
-                )
-            },
-            vulNodeOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.nodeHighVuls,
-                    x.nodeMedVuls
-                  )
-                )
-            },
-            vulPlatformOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) =>
-                Right(
-                  VulnerabilityCount(
-                    x.platformHighVuls,
-                    x.platformMedVuls
-                  )
-                )
-            },
-            vulNodeOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) => Right(x.totalHost)
-            },
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) => Right(x.totalScannedPods)
-            },
-            vulContainerOutput match {
-              case Left(x)  => Left(x)
-              case Right(x) => Right(x.totalScannedPodsWithoutSystem)
-            }
-          ),
-          serviceMaps match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              Right(
-                ServiceConnectionRisk(
-                  x.serviceModeMap.getOrElse(DISCOVER, 0),
-                  x.serviceModeMap.getOrElse(MONITOR, 0),
-                  x.serviceModeMap.getOrElse(PROTECT, 0)
-                )
-              )
-          },
-          conversationsOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              Right(
-                IngressEgressRisk(
-                  x.exposureModeMap.getOrElse(DISCOVER, 0),
-                  x.exposureModeMap.getOrElse(MONITOR, 0),
-                  x.exposureModeMap.getOrElse(PROTECT, 0),
-                  x.exposureThreat,
-                  x.exposureViolation
-                )
-              )
-          },
-          hasPrivilegedContainer,
-          hasRunAsRoot,
-          hasAdmissionRules,
-          isNewServiceDiscover,
-          totalRunningPods,
-          domains
-        )
-
-        val scoreOutput = getScore(
-          scoreInput,
-          isGlobalUser.getOrElse("true") == "true" || domainVal.nonEmpty
-        )
-
-        /*========================================================================================
-           Construct dashboard API response
-         ========================================================================================*/
-        val dashboardScoreDTO = DashboardScoreDTO(
-          serviceMaps match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              Right(getHighPriorityVulnerabilities(containers, vulNodes, domainVal, x))
-          },
-          runningContainers,
-          servicesOutput,
-          policyOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) => Right(x.applicationsInPolicy)
-          },
-          conversationsOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) => Right(x.applicationsInPolicy2)
-          },
-          serviceMaps match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              Right(
-                PolicyCoverage(
-                  x.serviceUnderRulesMap.values.toArray,
-                  x.otherServiceMap.values.toArray
-                )
-              )
-          },
-          conversationsOutput match {
-            case Left(x)  => Left(x)
-            case Right(x) =>
-              runningContainersOutput match {
-                case Left(y)  => Left(y)
-                case Right(_) =>
-                  Right(
-                    ExposedConversations(
-                      x.ingressConversations,
-                      x.egressConversations
-                    )
-                  )
-              }
-          },
-          autoScan,
-          scoreInput,
-          scoreOutput
-        )
-        logger.debug("Got {}", dashboardScoreDTO)
-        val endTime           = new DateTime()
-        logger.info("Dashbaord scores - End: {}", endTime)
-        logger.info(
-          "Dashbaord scores - Calculation Duration: {}",
-          endTime.getMillis - calculationStartTime.getMillis
-        )
-        logger.info(
-          "Dashbaord scores - Duration: {}",
-          endTime.getMillis - startTime.getMillis
-        )
-
-        dashboardScoreDTO
-      } catch {
-        case NonFatal(e) =>
-          RestClient.handleError(
-            timeOutStatus,
-            authenticationFailedStatus,
-            serverErrorStatus,
-            e
-          )
-      }
+      val domainVal       = domain.getOrElse("")
+      val isGlobalUserVal = isGlobalUser.getOrElse("true") == "true"
+      val query4Domain    = if (domain.isEmpty) "" else s"f_domain=$domainVal"
+      val query           = s"${query4Domain}&isGlobalUser=$isGlobalUserVal"
+      RestClient.httpRequestWithHeader(
+        s"${baseClusterUri(tokenId)}/system/score/metrics?$query",
+        HttpMethods.GET,
+        "",
+        tokenId
+      )
     }
 
   def getNotifications(tokenId: String, domain: Option[String]): Route = complete {
@@ -1773,8 +1267,8 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     val platformScore = if (platform.highVul + platform.mediumVul > 0) MAX_PLATFORM_VUL_SCORE else 0
     (podScore + hostScore + platformScore).toInt
   }
-
-  private lazy val getScore2 = (
+  // Deprecated
+  private lazy val getScore2             = (
     metrics: Metrics,
     totalRunningPodsOption: Option[Int],
     hasError: Boolean,
@@ -1886,143 +1380,143 @@ class DashboardService()(implicit executionContext: ExecutionContext)
     )
   }
 
-  private lazy val getScore = (
-    scoreInput: ScoreInput,
-    isGlobalUser: Boolean
-  ) => {
-    val newServiceModeScore                          = scoreInput.isNewServiceDiscover match {
-      case Right(x) => Right(getNewServiceModeScore(x))
-      case Left(x)  => Left(x)
-    }
-    val serviceModeScoreBy100                        = scoreInput.serviceConnectionRisk match {
-      case Right(x) => Right(getServiceModeScore(x))
-      case Left(x)  => Left(x)
-    }
-    val serviceModeScore                             = serviceModeScoreBy100 match {
-      case Right(x) => Right((x / 100.0 * MAX_SERVICE_MODE_SCORE).toInt)
-      case Left(x)  => Left(x)
-    }
-    val exposureScore: Either[Error, Int]            = scoreInput.ingressEgressRisk match {
-      case Left(x)  => Left(x)
-      case Right(x) =>
-        scoreInput.totalRunningPods match {
-          case Left(y)  => Left(y)
-          case Right(y) => Right(getExposureScore(x, y))
-        }
-    }
-    val exposureScoreBy100                           = exposureScore match {
-      case Right(x) =>
-        Right(
-          (x * 100 / (MAX_MODE_EXPOSURE + MAX_VIOLATE_EXPOSURE + MAX_THREAT_EXPOSURE).toDouble).toInt
-        )
-      case Left(x)  => Left(x)
-    }
-    val privilegedContainerScore: Either[Error, Int] = scoreInput.hasPrivilegedContainer match {
-      case Right(x) => Right(getPrivilegedContainerScore(x))
-      case Left(x)  => Left(x)
-    }
-    val runAsRootScore                               = scoreInput.hasRunAsRoot match {
-      case Right(x) => Right(getRunAsRootScore(x))
-      case Left(x)  => Left(x)
-    }
-    val admissionRuleScore                           = scoreInput.hasAdmissionRules match {
-      case Left(x)  => Left(x)
-      case Right(x) => Right(getAdmissionRuleScore(x))
-    }
-    val vulnerabilityScore                           = scoreInput.vulnerabilityExploitRisk.discover match {
-      case Left(x)  => Left(x)
-      case Right(x) =>
-        scoreInput.vulnerabilityExploitRisk.monitor match {
-          case Left(y)  => Left(y)
-          case Right(y) =>
-            scoreInput.vulnerabilityExploitRisk.protect match {
-              case Left(z)  => Left(z)
-              case Right(z) =>
-                scoreInput.vulnerabilityExploitRisk.quarantined match {
-                  case Left(a)  => Left(a)
-                  case Right(a) =>
-                    scoreInput.vulnerabilityExploitRisk.host match {
-                      case Left(b)  => Left(b)
-                      case Right(b) =>
-                        scoreInput.vulnerabilityExploitRisk.platform match {
-                          case Left(c)  => Left(c)
-                          case Right(c) =>
-                            scoreInput.vulnerabilityExploitRisk.totalScannedHost match {
-                              case Left(d)  => Left(d)
-                              case Right(d) =>
-                                scoreInput.vulnerabilityExploitRisk.totalScannedPodsWithoutSystem match {
-                                  case Left(e)  => Left(e)
-                                  case Right(e) =>
-                                    Right(getVulnerabilityScore(x, y, z, a, b, c, d, e))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    val vulnerabilityScoreBy100                      = vulnerabilityScore match {
-      case Left(x)  => Left(x)
-      case Right(x) =>
-        Right(
-          (x * 100 / (MAX_POD_VUL_SCORE + MAX_HOST_VUL_SCORE + MAX_PLATFORM_VUL_SCORE).toDouble).toInt
-        )
-    }
-
-    val securityRiskScore =
-      exposureScore match {
-        case Left(x)  => Left(x)
-        case Right(x) =>
-          privilegedContainerScore match {
-            case Left(y)  => Left(y)
-            case Right(y) =>
-              runAsRootScore match {
-                case Left(z)  => Left(z)
-                case Right(z) =>
-                  serviceModeScore match {
-                    case Left(a)  => Left(a)
-                    case Right(a) =>
-                      vulnerabilityScore match {
-                        case Left(b)  => Left(b)
-                        case Right(b) =>
-                          admissionRuleScore match {
-                            case Left(c)  => Left(c)
-                            case Right(c) =>
-                              newServiceModeScore match {
-                                case Left(d)  => Left(d)
-                                case Right(d) =>
-                                  if (isGlobalUser) {
-                                    Right(d + a + x + y + z + c + b)
-                                  } else {
-                                    Right(
-                                      ((a + x + y + z + b) /
-                                      (MAX_MODE_EXPOSURE + MAX_VIOLATE_EXPOSURE + MAX_THREAT_EXPOSURE + MAX_PRIVILEGED_CONTAINER_SCORE +
-                                      MAX_RUN_AS_ROOT_CONTAINER_SCORE + MAX_POD_VUL_SCORE + MAX_HOST_VUL_SCORE + MAX_PLATFORM_VUL_SCORE).toDouble * 100).toInt
-                                    )
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
-
-    ScoreOutput(
-      newServiceModeScore,
-      serviceModeScore,
-      serviceModeScoreBy100,
-      exposureScore,
-      exposureScoreBy100,
-      privilegedContainerScore,
-      runAsRootScore,
-      admissionRuleScore,
-      vulnerabilityScore,
-      vulnerabilityScoreBy100,
-      securityRiskScore
-    )
-  }
+  // private lazy val getScore = (
+  //   scoreInput: ScoreInput,
+  //   isGlobalUser: Boolean
+  // ) => {
+  //   val newServiceModeScore                          = scoreInput.isNewServiceDiscover match {
+  //     case Right(x) => Right(getNewServiceModeScore(x))
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val serviceModeScoreBy100                        = scoreInput.serviceConnectionRisk match {
+  //     case Right(x) => Right(getServiceModeScore(x))
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val serviceModeScore                             = serviceModeScoreBy100 match {
+  //     case Right(x) => Right((x / 100.0 * MAX_SERVICE_MODE_SCORE).toInt)
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val exposureScore: Either[Error, Int]            = scoreInput.ingressEgressRisk match {
+  //     case Left(x)  => Left(x)
+  //     case Right(x) =>
+  //       scoreInput.totalRunningPods match {
+  //         case Left(y)  => Left(y)
+  //         case Right(y) => Right(getExposureScore(x, y))
+  //       }
+  //   }
+  //   val exposureScoreBy100                           = exposureScore match {
+  //     case Right(x) =>
+  //       Right(
+  //         (x * 100 / (MAX_MODE_EXPOSURE + MAX_VIOLATE_EXPOSURE + MAX_THREAT_EXPOSURE).toDouble).toInt
+  //       )
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val privilegedContainerScore: Either[Error, Int] = scoreInput.hasPrivilegedContainer match {
+  //     case Right(x) => Right(getPrivilegedContainerScore(x))
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val runAsRootScore                               = scoreInput.hasRunAsRoot match {
+  //     case Right(x) => Right(getRunAsRootScore(x))
+  //     case Left(x)  => Left(x)
+  //   }
+  //   val admissionRuleScore                           = scoreInput.hasAdmissionRules match {
+  //     case Left(x)  => Left(x)
+  //     case Right(x) => Right(getAdmissionRuleScore(x))
+  //   }
+  //   val vulnerabilityScore                           = scoreInput.vulnerabilityExploitRisk.discover match {
+  //     case Left(x)  => Left(x)
+  //     case Right(x) =>
+  //       scoreInput.vulnerabilityExploitRisk.monitor match {
+  //         case Left(y)  => Left(y)
+  //         case Right(y) =>
+  //           scoreInput.vulnerabilityExploitRisk.protect match {
+  //             case Left(z)  => Left(z)
+  //             case Right(z) =>
+  //               scoreInput.vulnerabilityExploitRisk.quarantined match {
+  //                 case Left(a)  => Left(a)
+  //                 case Right(a) =>
+  //                   scoreInput.vulnerabilityExploitRisk.host match {
+  //                     case Left(b)  => Left(b)
+  //                     case Right(b) =>
+  //                       scoreInput.vulnerabilityExploitRisk.platform match {
+  //                         case Left(c)  => Left(c)
+  //                         case Right(c) =>
+  //                           scoreInput.vulnerabilityExploitRisk.totalScannedHost match {
+  //                             case Left(d)  => Left(d)
+  //                             case Right(d) =>
+  //                               scoreInput.vulnerabilityExploitRisk.totalScannedPodsWithoutSystem match {
+  //                                 case Left(e)  => Left(e)
+  //                                 case Right(e) =>
+  //                                   Right(getVulnerabilityScore(x, y, z, a, b, c, d, e))
+  //                               }
+  //                           }
+  //                       }
+  //                   }
+  //               }
+  //           }
+  //       }
+  //   }
+  //   val vulnerabilityScoreBy100                      = vulnerabilityScore match {
+  //     case Left(x)  => Left(x)
+  //     case Right(x) =>
+  //       Right(
+  //         (x * 100 / (MAX_POD_VUL_SCORE + MAX_HOST_VUL_SCORE + MAX_PLATFORM_VUL_SCORE).toDouble).toInt
+  //       )
+  //   }
+  //
+  //   val securityRiskScore =
+  //     exposureScore match {
+  //       case Left(x)  => Left(x)
+  //       case Right(x) =>
+  //         privilegedContainerScore match {
+  //           case Left(y)  => Left(y)
+  //           case Right(y) =>
+  //             runAsRootScore match {
+  //               case Left(z)  => Left(z)
+  //               case Right(z) =>
+  //                 serviceModeScore match {
+  //                   case Left(a)  => Left(a)
+  //                   case Right(a) =>
+  //                     vulnerabilityScore match {
+  //                       case Left(b)  => Left(b)
+  //                       case Right(b) =>
+  //                         admissionRuleScore match {
+  //                           case Left(c)  => Left(c)
+  //                           case Right(c) =>
+  //                             newServiceModeScore match {
+  //                               case Left(d)  => Left(d)
+  //                               case Right(d) =>
+  //                                 if (isGlobalUser) {
+  //                                   Right(d + a + x + y + z + c + b)
+  //                                 } else {
+  //                                   Right(
+  //                                     ((a + x + y + z + b) /
+  //                                     (MAX_MODE_EXPOSURE + MAX_VIOLATE_EXPOSURE + MAX_THREAT_EXPOSURE + MAX_PRIVILEGED_CONTAINER_SCORE +
+  //                                     MAX_RUN_AS_ROOT_CONTAINER_SCORE + MAX_POD_VUL_SCORE + MAX_HOST_VUL_SCORE + MAX_PLATFORM_VUL_SCORE).toDouble * 100).toInt
+  //                                   )
+  //                                 }
+  //                             }
+  //                         }
+  //                     }
+  //                 }
+  //             }
+  //         }
+  //     }
+  //
+  //   ScoreOutput(
+  //     newServiceModeScore,
+  //     serviceModeScore,
+  //     serviceModeScoreBy100,
+  //     exposureScore,
+  //     exposureScoreBy100,
+  //     privilegedContainerScore,
+  //     runAsRootScore,
+  //     admissionRuleScore,
+  //     vulnerabilityScore,
+  //     vulnerabilityScoreBy100,
+  //     securityRiskScore
+  //   )
+  // }
 
   private lazy val getExposedConversation = (
     k: String,

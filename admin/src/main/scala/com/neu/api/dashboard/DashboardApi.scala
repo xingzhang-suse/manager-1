@@ -31,25 +31,25 @@ class DashboardApi(resourceService: DashboardService) extends BaseApi {
           }
         }
       } ~
-      path("scores2") {
-        get {
-          parameters(Symbol("isGlobalUser"), Symbol("domain").?) { (isGlobalUser, domain) =>
-            Utils.respondWithWebServerHeaders() {
-              resourceService.getScore2(tokenId, isGlobalUser, domain)
-            }
-          }
-        } ~
-        patch {
-          parameters(Symbol("isGlobalUser"), Symbol("totalRunningPods")) {
-            (isGlobalUser, totalRunningPods) =>
-              entity(as[Metrics]) { metrics =>
-                Utils.respondWithWebServerHeaders() {
-                  resourceService.updateScore2(tokenId, isGlobalUser, totalRunningPods, metrics)
-                }
-              }
-          }
-        }
-      } ~
+      // path("scores2") {
+      //   // get {
+      //   //   parameters(Symbol("isGlobalUser"), Symbol("domain").?) { (isGlobalUser, domain) =>
+      //   //     Utils.respondWithWebServerHeaders() {
+      //   //       resourceService.getScore2(tokenId, isGlobalUser, domain)
+      //   //     }
+      //   //   }
+      //   // } ~
+      //   patch {
+      //     parameters(Symbol("isGlobalUser"), Symbol("totalRunningPods")) {
+      //       (isGlobalUser, totalRunningPods) =>
+      //         entity(as[Metrics]) { metrics =>
+      //           Utils.respondWithWebServerHeaders() {
+      //             resourceService.updateScore2(tokenId, isGlobalUser, totalRunningPods, metrics)
+      //           }
+      //         }
+      //     }
+      //   }
+      // } ~
       path("details") {
         parameters(Symbol("isGlobalUser").?, Symbol("domain").?) { (_, domain) =>
           Utils.respondWithWebServerHeaders() {
@@ -58,12 +58,10 @@ class DashboardApi(resourceService: DashboardService) extends BaseApi {
         }
       } ~
       path("scores") {
-        patch {
-          parameters(Symbol("isGlobalUser").?) { isGlobalUser =>
-            entity(as[ScoreInput]) { scoreInput =>
-              Utils.respondWithWebServerHeaders() {
-                resourceService.queryScore(tokenId, isGlobalUser, scoreInput)
-              }
+        post {
+          entity(as[MetricsWrap]) { metricsData =>
+            Utils.respondWithWebServerHeaders() {
+              resourceService.queryScore(tokenId, metricsData)
             }
           }
         } ~
