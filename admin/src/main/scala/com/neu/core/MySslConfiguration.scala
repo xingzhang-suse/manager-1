@@ -20,6 +20,7 @@ import java.security.spec.*
 import java.util.{ Base64, Date }
 import javax.net.ssl.{ KeyManagerFactory, SSLContext, SSLEngine, TrustManagerFactory }
 import scala.jdk.CollectionConverters.*
+import scala.util.Random
 
 trait MySslConfiguration extends LazyLogging {
 
@@ -137,8 +138,10 @@ trait MySslConfiguration extends LazyLogging {
   }
 
   private def loadCertificateAndKey(fCert: File, fKey: File, context: SSLContext): SSLContext = {
-
-    val password               = Array('n', 'e', 'u', 'v', 'e', 'c', 't', 'o', 'r')
+    val passwordSeed           = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    val random                 = new Random
+    val password               =
+      (1 to 10).map(_ => passwordSeed(random.nextInt(passwordSeed.length))).mkString.toCharArray
     val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
     val trustManagerFactory    = TrustManagerFactory.getInstance("PKIX")
     val keyManagerFactory      = KeyManagerFactory.getInstance("PKIX")
