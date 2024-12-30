@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
-import { AddEditRuleModalComponent } from '@routes/waf-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component';
+import { AddEditRuleModalComponent } from '@components/dlp-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { ConfirmDialogComponent } from '@components/ui/confirm-dialog/confirm-dialog.component';
 import { switchMap } from 'rxjs/operators';
-import { WafSensorsService } from '@services/waf-sensors.service';
+import { DlpSensorsService } from '@services/dlp-sensors.service';
 import { TranslateService } from '@ngx-translate/core';
 import { NotificationService } from '@services/notification.service';
 import { MapConstant } from '@common/constants/map.constant';
@@ -22,9 +22,9 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
   isPredefine!: boolean;
 
   constructor(
-    private translate: TranslateService,
-    private wafSensorsService: WafSensorsService,
     private dialog: MatDialog,
+    private translate: TranslateService,
+    private dlpSensorsService: DlpSensorsService,
     private notificationService: NotificationService,
     private utils: UtilsService
   ) {}
@@ -58,7 +58,7 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       maxWidth: '700px',
       data: {
-        message: this.translate.instant('waf.msg.REMOVE_CFM'),
+        message: this.translate.instant('dlp.msg.REMOVE_CFM'),
       },
     });
     dialogRef.componentInstance.confirm
@@ -76,7 +76,7 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
               rules: this.params.context.componentParent.selectedSensor.rules,
             },
           };
-          return this.wafSensorsService.updateWafSensorData(
+          return this.dlpSensorsService.updateDlpSensorData(
             payload,
             GlobalConstant.MODAL_OP.EDIT
           );
@@ -84,7 +84,6 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
       )
       .subscribe(
         res => {
-          // confirm actions
           let gridApi = this.params.context.componentParent.gridApi4Rules!;
           let rules = this.params.context.componentParent.selectedSensor.rules;
           gridApi.setRowData(rules);
@@ -99,7 +98,7 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
             );
           }
           this.notificationService.open(
-            this.translate.instant('waf.msg.REMOVE_RULE_OK')
+            this.translate.instant('dlp.msg.REMOVE_RULE_OK')
           );
           // close dialog
           dialogRef.componentInstance.onCancel();
@@ -110,7 +109,7 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
             this.notificationService.open(
               this.utils.getAlertifyMsg(
                 error.error,
-                this.translate.instant('waf.msg.REMOVE_RULE_NG'),
+                this.translate.instant('dlp.msg.REMOVE_RULE_NG'),
                 false
               ),
               GlobalConstant.NOTIFICATION_TYPE.ERROR

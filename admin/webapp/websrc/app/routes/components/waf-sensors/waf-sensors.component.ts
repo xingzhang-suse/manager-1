@@ -1,46 +1,41 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, ElementRef } from '@angular/core';
 import { AuthUtilsService } from '@common/utils/auth.utils';
 import {
-  DlpSensor,
-  DlpRule,
+  WafSensor,
+  WafRule,
   RemoteExportOptionsWrapper,
   RemoteExportOptions,
 } from '@common/types';
-import {
-  ColDef,
-  GridApi,
-  GridOptions,
-  GridReadyEvent,
-} from 'ag-grid-community';
-import { DlpSensorsService } from '@services/dlp-sensors.service';
+import { GridOptions, GridApi } from 'ag-grid-community';
+import { WafSensorsService } from '@services/waf-sensors.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { PathConstant } from '@common/constants/path.constant';
 import { MapConstant } from '@common/constants/map.constant';
 import { GlobalVariable } from '@common/variables/global.variable';
-import { AddEditSensorModalComponent } from '@routes/dlp-sensors/partial/add-edit-sensor-modal/add-edit-sensor-modal.component';
-import { AddEditRuleModalComponent } from '@routes/dlp-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component';
+import { AddEditSensorModalComponent } from '@components/waf-sensors/partial/add-edit-sensor-modal/add-edit-sensor-modal.component';
+import { AddEditRuleModalComponent } from '@components/waf-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component';
 import { UtilsService } from '@common/utils/app.utils';
 import { saveAs } from 'file-saver';
 import { ImportFileModalComponent } from '@components/ui/import-file-modal/import-file-modal.component';
-import { MultiClusterService } from '@services/multi-cluster.service';
-import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { NotificationService } from '@services/notification.service';
 import { ExportOptionsModalComponent } from '@components/export-options-modal/export-options-modal.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import * as $ from 'jquery';
 
 @Component({
-  selector: 'app-dlp-sensors',
-  templateUrl: './dlp-sensors.component.html',
-  styleUrls: ['./dlp-sensors.component.scss'],
+  selector: 'app-waf-sensors',
+  templateUrl: './waf-sensors.component.html',
+  styleUrls: ['./waf-sensors.component.scss'],
 })
-export class DlpSensorsComponent implements OnInit, OnDestroy {
+export class WafSensorsComponent implements OnInit {
+  @Input() source: string;
+  navSource = GlobalConstant.NAV_SOURCE;
+  wafSensors: Array<WafSensor> = [];
   refreshing$ = new Subject();
-  dlpSensors: Array<DlpSensor> = [];
-  isWriteDLPSensorAuthorized!: boolean;
+  isWriteWAFSensorAuthorized: boolean = false;
   gridOptions: any;
   gridOptions4Sensors!: GridOptions;
   gridOptions4Rules!: GridOptions;
@@ -50,23 +45,27 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
   gridApi4Rules!: GridApi;
   gridApi4Patterns!: GridApi;
   filteredCount: number = 0;
-  selectedSensors!: Array<DlpSensor>;
-  selectedSensor!: DlpSensor;
-  selectedRule!: DlpRule;
+  selectedSensors!: Array<WafSensor>;
+  selectedSensor!: WafSensor;
+  selectedRule!: WafRule;
   index4Sensor!: number;
   isPredefine!: boolean;
   filtered: boolean = false;
   context = { componentParent: this };
   $win: any;
-  private _switchClusterSubscription;
   serverErrorMessage: SafeHtml = '';
 
+  get wafSensorsCount() {
+    if (this.wafSensors?.length) return this.wafSensors.length;
+    else return 0;
+  }
+
   constructor(
-    private dlpSensorsService: DlpSensorsService,
+    private el: ElementRef,
+    private wafSensorsService: WafSensorsService,
     private dialog: MatDialog,
     private authUtilsService: AuthUtilsService,
     private utilsService: UtilsService,
-    private multiClusterService: MultiClusterService,
     private notificationService: NotificationService,
     private translate: TranslateService,
     private domSanitizer: DomSanitizer
@@ -75,11 +74,11 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.isWriteDLPSensorAuthorized =
-      this.authUtilsService.getDisplayFlag('write_dlp_rule') &&
+    this.isWriteWAFSensorAuthorized =
+      this.authUtilsService.getDisplayFlag('write_waf_rule') &&
       !this.authUtilsService.userPermission.isNamespaceUser;
-    this.gridOptions = this.dlpSensorsService.configGrids(
-      this.isWriteDLPSensorAuthorized
+    this.gridOptions = this.wafSensorsService.configGrids(
+      this.isWriteWAFSensorAuthorized
     );
     this.gridOptions4Sensors = this.gridOptions.gridOptions;
     this.gridOptions4Sensors.onGridReady = params => {
@@ -144,37 +143,24 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
     this.gridOptions4Rules.onSelectionChanged = this.onSelectionChanged4Rule;
 
     this.refresh();
-
-    //refresh the page when it switched to a remote cluster
-    this._switchClusterSubscription =
-      this.multiClusterService.onClusterSwitchedEvent$.subscribe(data => {
-        this.refresh();
-      });
-  }
-
-  ngOnDestroy(): void {
-    if (this._switchClusterSubscription) {
-      this._switchClusterSubscription.unsubscribe();
-    }
   }
 
   refresh = (index: number = 0) => {
-    this.refreshing$.next(true);
-    this.getDlpSensors(index);
+    this.getWafSensors(index);
   };
 
-  openAddEditDlpSensorModal = () => {
+  openAddEditWafSensorModal = () => {
     const addEditDialogRef = this.dialog.open(AddEditSensorModalComponent, {
       width: '80%',
       data: {
         opType: GlobalConstant.MODAL_OP.ADD,
-        dlpSensors: this.dlpSensors,
+        wafSensors: this.wafSensors,
         gridApi: this.gridApi4Sensors!,
       },
     });
   };
 
-  openAddDlpRuleModal = () => {
+  openAddWafRuleModal = () => {
     const addEditDialogRef = this.dialog.open(AddEditRuleModalComponent, {
       width: '80%',
       data: {
@@ -187,10 +173,10 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
     });
   };
 
-  openImportDlpSensorsModal = () => {
+  openImportWafSensorsModal = () => {
     const importDialogRef = this.dialog.open(ImportFileModalComponent, {
       data: {
-        importUrl: PathConstant.DLP_SENSORS_IMPORT_URL,
+        importUrl: PathConstant.WAF_SENSORS_IMPORT_URL,
         importMsg: {
           success: this.translate.instant('waf.msg.IMPORT_FINISH'),
           error: this.translate.instant('waf.msg.IMPORT_FAILED'),
@@ -204,29 +190,29 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
     });
   };
 
-  exportDlpSensors = () => {
+  exportWafSensors = () => {
     const dialogRef = this.dialog.open(ExportOptionsModalComponent, {
       width: '50%',
       disableClose: true,
       data: {
-        filename: GlobalConstant.REMOTE_EXPORT_FILENAME.DLP,
+        filename: GlobalConstant.REMOTE_EXPORT_FILENAME.WAF,
       },
     });
 
     dialogRef.afterClosed().subscribe((result: RemoteExportOptionsWrapper) => {
       if (result) {
         const { export_mode, ...exportOptions } = result.export_options;
-        this.exportUtil(export_mode, exportOptions);
+        this.exportUtils(export_mode, exportOptions);
       }
     });
   };
 
-  exportUtil(mode: string, option: RemoteExportOptions) {
+  exportUtils(mode: string, option: RemoteExportOptions) {
     if (mode === 'local') {
       let payload = {
         names: this.selectedSensors.map(sensor => sensor.name),
       };
-      this.dlpSensorsService.getDlpSensorConfigFileData(payload).subscribe(
+      this.wafSensorsService.getWafSensorConfigFileData(payload).subscribe(
         response => {
           let fileName = this.utilsService.getExportedFileName(response);
           let blob = new Blob([response.body || ''], {
@@ -234,7 +220,7 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
           });
           saveAs(blob, fileName);
           this.notificationService.open(
-            this.translate.instant('dlp.msg.EXPORT_SENSOR_OK')
+            this.translate.instant('waf.msg.EXPORT_SENSOR_OK')
           );
         },
         error => {
@@ -242,7 +228,7 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
             this.notificationService.open(
               this.utilsService.getAlertifyMsg(
                 error.error,
-                this.translate.instant('dlp.msg.EXPORT_SENSOR_NG'),
+                this.translate.instant('waf.msg.EXPORT_SENSOR_NG'),
                 false
               ),
               GlobalConstant.NOTIFICATION_TYPE.ERROR
@@ -255,10 +241,10 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
         names: this.selectedSensors.map(sensor => sensor.name),
         remote_export_options: option,
       };
-      this.dlpSensorsService.getDlpSensorConfigFileData(payload).subscribe(
+      this.wafSensorsService.getWafSensorConfigFileData(payload).subscribe(
         response => {
           this.notificationService.open(
-            this.translate.instant('dlp.msg.EXPORT_SENSOR_OK')
+            this.translate.instant('waf.msg.EXPORT_SENSOR_OK')
           );
         },
         error => {
@@ -273,7 +259,7 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
 
           this.notificationService.open(
             this.serverErrorMessage
-              ? this.translate.instant('dlp.msg.EXPORT_SENSOR_NG')
+              ? this.translate.instant('waf.msg.EXPORT_SENSOR_NG')
               : this.utilsService.getAlertifyMsg(error, '', false),
             GlobalConstant.NOTIFICATION_TYPE.ERROR
           );
@@ -284,24 +270,19 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
     }
   }
 
-  get dlpSensorsCount() {
-    if (this.dlpSensors?.length) return this.dlpSensors.length;
-    else return 0;
-  }
-
   filterCountChanged(results: number) {
     this.filteredCount = results;
-    this.filtered = this.filteredCount !== this.dlpSensorsCount;
+    this.filtered = this.filteredCount !== this.wafSensorsCount;
   }
 
-  private getDlpSensors = (index: number) => {
-    this.dlpSensorsService
-      .getDlpSensorsData()
+  private getWafSensors = (index: number) => {
+    this.wafSensorsService
+      .getWafSensorsData()
       .pipe(finalize(() => this.refreshing$.next(false)))
       .subscribe(
         response => {
-          this.dlpSensors = response as Array<DlpSensor>;
-          this.filteredCount = this.dlpSensors.length;
+          this.wafSensors = response as Array<WafSensor>;
+          this.filteredCount = this.wafSensors.length;
           setTimeout(() => {
             let rowNode = this.gridApi4Sensors!.getDisplayedRowAtIndex(index);
             rowNode?.setSelected(true);
@@ -314,7 +295,7 @@ export class DlpSensorsComponent implements OnInit, OnDestroy {
   private onSelectionChanged4Sensor = () => {
     this.selectedSensors = this.gridApi4Sensors!.getSelectedRows();
     this.selectedSensor = this.selectedSensors[0];
-    this.index4Sensor = this.dlpSensors.findIndex(
+    this.index4Sensor = this.wafSensors.findIndex(
       sensor => sensor.name === (this.selectedSensor?.name || '')
     );
     this.isPredefine = this.selectedSensor?.predefine || false;

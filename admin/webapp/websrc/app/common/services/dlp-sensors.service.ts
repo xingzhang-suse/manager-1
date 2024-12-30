@@ -8,9 +8,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { UtilsService } from '@common/utils/app.utils';
 import { pluck } from 'rxjs/operators';
-import { SensorActionButtonsComponent } from '@routes/dlp-sensors/partial/sensor-action-buttons/sensor-action-buttons.component';
-import { RuleActionButtonsComponent } from '@routes/dlp-sensors/partial/rule-action-buttons/rule-action-buttons.component';
-import { PatternActionButtonsComponent } from '@routes/dlp-sensors/partial/pattern-action-buttons/pattern-action-buttons.component';
+import { SensorActionButtonsComponent } from '@components/dlp-sensors/partial/sensor-action-buttons/sensor-action-buttons.component';
+import { RuleActionButtonsComponent } from '@components/dlp-sensors/partial/rule-action-buttons/rule-action-buttons.component';
+import { PatternActionButtonsComponent } from '@components/dlp-sensors/partial/pattern-action-buttons/pattern-action-buttons.component';
 
 @Injectable({
   providedIn: 'root',

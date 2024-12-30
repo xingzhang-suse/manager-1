@@ -7,6 +7,7 @@ import {
   Renderer2,
   TemplateRef,
 } from '@angular/core';
+import { GlobalConstant } from '@common/constants/global.constant';
 
 interface ContainerOneHeightContext {
   $implicit: number;
@@ -41,17 +42,25 @@ export class AdjustableDivComponent implements OnDestroy {
   @ContentChild(ContainerTwoDirective, { static: true })
   containerTwoDir!: ContainerTwoDirective;
 
+  @Input() source: string = '';
   @Input() minHeightOne;
   @Input() minHeightTwo;
   @Input() roof = 157.4 - 40;
-  unknownScale = 75.6;
-  gridHeight = window.innerHeight - this.roof - this.unknownScale;
-  heightOne = this.gridHeight / 2;
-  heightTwo = this.gridHeight / 2;
+  unknownScale = 0;
+  gridHeight = 0;
+  heightOne = 0;
+  heightTwo = 0;
   mousemoveListener;
   mouseupListener;
 
   constructor(private renderer2: Renderer2) {}
+
+  ngOnInit(): void {
+    this.unknownScale = this.source === GlobalConstant.NAV_SOURCE.FED_POLICY ? 110 : 75.6;
+    this.gridHeight = window.innerHeight - this.roof - this.unknownScale;
+    this.heightOne = this.gridHeight / 2;
+    this.heightTwo = this.gridHeight / 2;
+  }
 
   get containerOneTpl(): TemplateRef<ContainerOneHeightContext> {
     return this.containerOneDir.tpl;

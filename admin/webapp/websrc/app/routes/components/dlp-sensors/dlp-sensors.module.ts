@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
 import { NvCommonModule } from '@common/nvCommon.module';
 import { AdjustableDivModule } from '@components/ui/adjustable-div/adjustable-div.module';
 import { AgGridModule } from 'ag-grid-angular';
@@ -15,11 +14,6 @@ import { LoadingButtonModule } from '@components/ui/loading-button/loading-butto
 import { PatternActionButtonsComponent } from './partial/pattern-action-buttons/pattern-action-buttons.component';
 import { ImportFileModalModule } from '@components/ui/import-file-modal/import-file-modal.module';
 import { ExportOptionsModalModule } from '@components/export-options-modal/export-options-modal.module';
-
-const routes: Routes = [
-  { path: '', component: DlpSensorsComponent },
-  { path: '*', redirectTo: '' },
-];
 
 @NgModule({
   declarations: [
@@ -38,13 +32,9 @@ const routes: Routes = [
     PipeModule,
     LoadingButtonModule,
     ImportFileModalModule,
-    RouterModule.forChild(routes),
     AgGridModule,
-    // AgGridModule.withComponents([
-    //   SensorActionButtonsComponent,
-    //   RuleActionButtonsComponent,
-    // ]),
     ExportOptionsModalModule,
   ],
+  exports: [DlpSensorsComponent],
 })
 export class DlpSensorsModule {}
