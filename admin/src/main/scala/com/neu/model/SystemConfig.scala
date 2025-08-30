@@ -120,6 +120,7 @@ case class SystemConfigSyslogCfgV2(
 
 case class SystemConfigAuthCfgV2(
   auth_order: Option[Array[String]] = None,
+  allow_ns_user_export_net_policy: Option[Boolean] = None,
   auth_by_platform: Option[Boolean] = None,
   rancher_ep: Option[String] = None
 )

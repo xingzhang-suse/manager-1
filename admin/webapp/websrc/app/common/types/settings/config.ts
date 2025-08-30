@@ -80,6 +80,7 @@ export interface SyslogConfig {
 
 export interface AuthConfig {
   auth_order: string[];
+  allow_ns_user_export_net_policy: boolean;
   auth_by_platform: boolean;
   rancher_ep: string;
 }

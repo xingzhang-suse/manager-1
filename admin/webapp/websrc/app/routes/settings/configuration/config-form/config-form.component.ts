@@ -123,6 +123,7 @@ export class ConfigFormComponent implements OnInit {
       isConfigAuthorized: isSettingAuth,
       isIBMSAAuthorized: isSettingAuth,
       isTlsAuthorized: isSettingAuth,
+      isNsUserExportNetworkRuleAuthorized: isSettingAuth,
     };
     this.serverErrorMessage = '';
     this.cd.detectChanges();
@@ -224,6 +225,7 @@ export class ConfigFormComponent implements OnInit {
         auth_cfg: {
           // NOTE: auth_cfg = {} - formly is missing auth_cfg fields
           auth_order: base_config.auth.auth_order,
+          allow_ns_user_export_net_policy: base_config.auth.allow_ns_user_export_net_policy,
           auth_by_platform: base_config.auth.auth_by_platform,
           rancher_ep: base_config.auth.rancher_ep,
         },

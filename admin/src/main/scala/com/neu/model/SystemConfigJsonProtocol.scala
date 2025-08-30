@@ -59,7 +59,7 @@ object SystemConfigJsonProtocol extends DefaultJsonProtocol {
     jsonFormat11(
       SystemConfigSyslogCfgV2.apply
     )
-  given systemConfigAuthCfgV2Format: RootJsonFormat[SystemConfigAuthCfgV2]             = jsonFormat3(
+  given systemConfigAuthCfgV2Format: RootJsonFormat[SystemConfigAuthCfgV2]             = jsonFormat4(
     SystemConfigAuthCfgV2.apply
   )
   given systemConfigProxyCfgV2Format: RootJsonFormat[SystemConfigProxyCfgV2]           = jsonFormat6(
