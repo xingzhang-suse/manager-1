@@ -13,6 +13,7 @@ import org.apache.pekko.http.scaladsl.HttpsConnectionContext
 import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.settings.ServerSettings
 import org.apache.pekko.stream.Materializer
+import com.neu.utils.MathUtils
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
@@ -39,6 +40,7 @@ trait BootedCore
 
   private val useSSL: String              = sys.env.getOrElse("MANAGER_SSL", "on")
   private val httpMaxHeaderLength: String = sys.env.getOrElse("HTTP_MAX_HEADER_LENGTH", "32k")
+  private val httpMaxHeaderLengthNum: Int = MathUtils.digitLength2Int(httpMaxHeaderLength)
   private val config: Config              =
     load
       .getConfig(if (useSSL == "off") "noneSsl" else "ssl")
@@ -46,15 +48,33 @@ trait BootedCore
       .withValue(
         "pekko.http.server.parsing.max-header-value-length",
         ConfigValueFactory.fromAnyRef(
-          httpMaxHeaderLength
+          httpMaxHeaderLengthNum
         )
       )
       .withValue(
         "pekko.http.client.parsing.max-header-value-length",
         ConfigValueFactory.fromAnyRef(
-          httpMaxHeaderLength
+          httpMaxHeaderLengthNum
         )
       )
+      .withValue(
+        "pekko.http.server.parsing.max-header-size",
+        ConfigValueFactory.fromAnyRef(
+          httpMaxHeaderLengthNum
+        )
+      )
+      .withValue(
+        "pekko.http.client.parsing.max-header-size",
+        ConfigValueFactory.fromAnyRef(
+          httpMaxHeaderLengthNum
+        )
+      )
+      .withFallback(defaultReference(getClass.getClassLoader))
+
+  logger.info(
+    "pekko.http.server.parsing: {}",
+    config.getConfig("pekko.http.server.parsing").root().render()
+  )
 
   private lazy val https: Option[HttpsConnectionContext] = useSSL match {
     case "off" => None

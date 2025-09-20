@@ -85,7 +85,7 @@ trait StaticResources extends Directives with LazyLogging {
       } else {
         if (path.endsWith(".js")) {
           Utils.respondWithWebServerHeaders(isStaticResource = true) {
-            respondWithHeader(RawHeader("Content-Type", "application/javascript")) {
+            respondWithHeader(RawHeader("Content-Type", "application/ecmascript")) {
               encodeResponse {
                 getFromResource(
                   UrlEscapers.urlFragmentEscaper().escape(s"root/$path.gz")
