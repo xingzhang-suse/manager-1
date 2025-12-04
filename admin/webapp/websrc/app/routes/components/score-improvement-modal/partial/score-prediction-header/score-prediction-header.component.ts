@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { UtilsService } from '@common/utils/app.utils';
 
 @Component({
+  standalone: false,
   selector: 'app-score-prediction-header',
   templateUrl: './score-prediction-header.component.html',
   styleUrls: ['./score-prediction-header.component.scss'],

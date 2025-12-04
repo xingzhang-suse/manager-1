@@ -10,6 +10,7 @@ import { GlobalConstant } from '@common/constants/global.constant';
 import { UtilsService } from '@common/utils/app.utils';
 
 @Component({
+  standalone: false,
   selector: 'app-risk-score',
   templateUrl: './risk-score.component.html',
   styleUrls: ['./risk-score.component.scss'],

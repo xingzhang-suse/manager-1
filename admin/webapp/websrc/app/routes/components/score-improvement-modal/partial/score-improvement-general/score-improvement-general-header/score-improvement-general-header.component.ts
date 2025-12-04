@@ -2,10 +2,13 @@ import { Component, OnInit, Input } from '@angular/core';
 import { UtilsService } from '@common/utils/app.utils';
 import { ScoreImprovementModalService } from '@services/score-improvement-modal.service';
 
+
 @Component({
+  standalone: false,
   selector: 'app-score-improvement-general-header',
   templateUrl: './score-improvement-general-header.component.html',
   styleUrls: ['./score-improvement-general-header.component.scss'],
+  
 })
 export class ScoreImprovementGeneralHeaderComponent implements OnInit {
   get score() {

@@ -288,7 +288,6 @@ import { RemoteGridBindingDirective } from './directives/remote-grid-binding.dir
   ],
 })
 
-// https://github.com/ocombe/ng2-translate/issues/209
 export class NvCommonModule {
   static forRoot(): ModuleWithProviders<NvCommonModule> {
     return {

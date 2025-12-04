@@ -25,6 +25,7 @@ import { Subject } from 'rxjs';
 import { UsersGridComponent } from '../users-grid.component';
 import { getNamespaceRoleGridData } from '@common/utils/common.utils';
 
+
 export interface AddEditUserDialog {
   isEdit: boolean;
   globalRoles: string[];
@@ -36,10 +37,12 @@ export interface AddEditUserDialog {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-add-edit-user-dialog',
   templateUrl: './add-edit-user-dialog.component.html',
   styleUrls: ['./add-edit-user-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  
 })
 export class AddEditUserDialogComponent implements OnInit {
   form!: FormGroup;

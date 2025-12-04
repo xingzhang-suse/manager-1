@@ -29,6 +29,7 @@ import { NotificationService } from '@services/notification.service';
 import { TranslateService } from '@ngx-translate/core';
 import { getNamespaceRoleGridData } from '@common/utils/common.utils';
 
+
 interface AddApikeyDialog {
   globalRoles: string[];
   domainRoles: string[];
@@ -38,9 +39,11 @@ interface AddApikeyDialog {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-add-apikey-dialog',
   templateUrl: './add-apikey-dialog.component.html',
   styleUrls: ['./add-apikey-dialog.component.scss'],
+  
 })
 export class AddApikeyDialogComponent implements OnInit {
   expirationOptions: ApikeyExpiration[] = [

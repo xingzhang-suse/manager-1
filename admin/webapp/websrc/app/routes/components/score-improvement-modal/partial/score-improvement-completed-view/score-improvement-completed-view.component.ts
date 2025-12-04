@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ScoreImprovementModalService } from '@services/score-improvement-modal.service';
 
 @Component({
+  standalone: false,
   selector: 'app-score-improvement-completed-view',
   templateUrl: './score-improvement-completed-view.component.html',
   styleUrls: ['./score-improvement-completed-view.component.scss'],

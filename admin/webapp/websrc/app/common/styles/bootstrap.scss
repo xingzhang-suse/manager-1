@@ -3,11 +3,11 @@
 //
 
 // Override bootstrap variables
-@import "app/variables";
+@forward "app/variables";
 // Bootstrap
-@import "bootstrap/bootstrap";
+@forward "bootstrap/bootstrap";
 // eos-ds
-@import "eos-ds/scss/index";
-@import "eos-ds/css/eos-style";
+@forward "eos-ds/scss/index";
+@forward "eos-ds/css/eos-style";
 // eos-icon
-@import "eos-icon/css/eos-icons";
+@forward "eos-icon/css/eos-icons";

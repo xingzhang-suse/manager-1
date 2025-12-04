@@ -30,11 +30,15 @@ import { AuthService } from '@services/auth.service';
 import { SettingsService } from '@services/settings.service';
 import { switchMap, take } from 'rxjs/operators';
 import { FrameService } from '../frame.service';
+import { DisplayControlDirective } from '@common/directives/displayControl.directive';
 
 @Component({
+  standalone: false,
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
+  imports: [DisplayControlDirective],
+  
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   navCollapsed = true;
