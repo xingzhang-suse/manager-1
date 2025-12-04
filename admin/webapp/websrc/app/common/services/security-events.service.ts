@@ -10,9 +10,29 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { AuthUtilsService } from '@common/utils/auth.utils';
 import { DatePipe } from '@angular/common';
 import { TimeAgoPipe } from 'time-ago-pipe';
-import { pluck } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EnforcerBriefDialogComponent } from '@routes/components/enforcer-brief/enforcer-brief-dialog/enforcer-brief-dialog.component';
+
+interface HostResponse {
+  host: any;
+}
+
+interface EnforcerResponse {
+  enforcer: any;
+}
+
+interface ThreatResponse {
+  threat: any;
+}
+
+interface ProcessProfileResponse {
+  process_profile: any;
+}
+
+interface PolicyRuleResponse {
+  rule: any;
+}
 
 @Injectable()
 export class SecurityEventsService {
@@ -455,18 +475,18 @@ export class SecurityEventsService {
 
   getHost = id => {
     return GlobalVariable.http
-      .get(PathConstant.NODES_URL, {
+      .get<HostResponse>(PathConstant.NODES_URL, {
         params: { id: id },
       })
-      .pipe(pluck('host'));
+      .pipe(map(r => r.host));
   };
 
   getEnforcer = id => {
     return GlobalVariable.http
-      .get(PathConstant.SINGLE_ENFORCER, {
+      .get<EnforcerResponse>(PathConstant.SINGLE_ENFORCER, {
         params: { id: id },
       })
-      .pipe(pluck('enforcer'));
+      .pipe(map(r => r.enforcer));
   };
 
   getProcess = id => {
@@ -481,14 +501,14 @@ export class SecurityEventsService {
 
   getPacketData = (id: string) => {
     return GlobalVariable.http
-      .get(PathConstant.THREAT_URL, { params: { id: id } })
-      .pipe(pluck('threat'));
+      .get<ThreatResponse>(PathConstant.THREAT_URL, { params: { id: id } })
+      .pipe(map(r => r.threat));
   };
 
   getProcessRule = (name: string) => {
     return GlobalVariable.http
-      .get(PathConstant.PROCESS_PROFILE_URL, { params: { name: name } })
-      .pipe(pluck('process_profile'));
+      .get<ProcessProfileResponse>(PathConstant.PROCESS_PROFILE_URL, { params: { name: name } })
+      .pipe(map(r => r.process_profile));
   };
 
   updateProcessRule = (payload: any) => {
@@ -499,8 +519,8 @@ export class SecurityEventsService {
 
   getNetworkRule = (ruleId: number) => {
     return GlobalVariable.http
-      .get(PathConstant.POLICY_RULE_URL, { params: { id: ruleId } })
-      .pipe(pluck('rule'));
+      .get<PolicyRuleResponse>(PathConstant.POLICY_RULE_URL, { params: { id: ruleId } })
+      .pipe(map(r => r.rule));
   };
 
   updateNetworkRule = (networkRule: any) => {

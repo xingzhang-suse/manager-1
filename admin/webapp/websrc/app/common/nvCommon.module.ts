@@ -54,7 +54,6 @@ import { TimepickerModule } from 'ngx-bootstrap/timepicker';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { PopoverModule } from 'ngx-bootstrap/popover';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
-import { DatepickerModule } from 'ngx-bootstrap/datepicker';
 import { CookieService } from 'ngx-cookie-service';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { ColorsService } from './colors/colors.service';
@@ -122,7 +121,6 @@ import { RemoteGridBindingDirective } from './directives/remote-grid-binding.dir
     ButtonsModule.forRoot(),
     CarouselModule.forRoot(),
     CollapseModule.forRoot(),
-    DatepickerModule.forRoot(),
     BsDatepickerModule.forRoot(),
     BsDropdownModule.forRoot(),
     ModalModule.forRoot(),
@@ -235,7 +233,6 @@ import { RemoteGridBindingDirective } from './directives/remote-grid-binding.dir
     ButtonsModule,
     CarouselModule,
     CollapseModule,
-    DatepickerModule,
     BsDatepickerModule,
     BsDropdownModule,
     ModalModule,
@@ -288,7 +285,6 @@ import { RemoteGridBindingDirective } from './directives/remote-grid-binding.dir
   ],
 })
 
-// https://github.com/ocombe/ng2-translate/issues/209
 export class NvCommonModule {
   static forRoot(): ModuleWithProviders<NvCommonModule> {
     return {
