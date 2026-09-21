@@ -121,13 +121,6 @@ def counter(data, id_or_name):
 
     display = []
 
-    legacy_total_assemblies_key = "total_" + "assembly" + "s"
-    legacy_freed_assemblies_key = "freed_" + "assembly" + "s"
-    if legacy_total_assemblies_key in counter and "total_assemblies" not in counter:
-        counter["total_assemblies"] = counter[legacy_total_assemblies_key]
-    if legacy_freed_assemblies_key in counter and "freed_assemblies" not in counter:
-        counter["freed_assemblies"] = counter[legacy_freed_assemblies_key]
-
     column_map = (("rx_packets", "Packet RX"),
                   ("rx_drop_packets", "Packet RX drop"),
                   ("tx_packets", "Packet TX"),
@@ -141,8 +134,8 @@ def counter(data, id_or_name):
                   ("udp_packets", "Packet UDP"),
                   ("icmp_packets", "Packet ICMP"),
                   ("other_packets", "Packet other"),
-                  ("total_assemblies", "TCP ASM"),
-                  ("freed_assemblies", "TCP ASM freed"),
+                  ("total_assemblys", "TCP ASM"),
+                  ("freed_assemblys", "TCP ASM freed"),
                   ("total_fragments", "IP fragment"),
                   ("freed_fragments", "IP fragment freed"),
                   ("timeout_fragments", "IP fragment timeout"),

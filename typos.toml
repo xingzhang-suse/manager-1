@@ -1,10 +1,18 @@
 [files]
 extend-exclude = [
   "admin/src/main/resources/**",
+  "admin/webapp/websrc/app/common/styles/eos-ds/images/dark-theme/sign-in-bg.svg",
+  "admin/webapp/websrc/app/common/styles/eos-ds/images/sign-in-bg.svg",
   "admin/webapp/websrc/assets/img/country-flag/**",
+  "admin/webapp/websrc/assets/img/dark-theme/sign-in-bg.svg",
+  "admin/webapp/websrc/assets/img/sign-in-bg.svg",
+  "cli/prog/enforcer.py",
   "java.security",
   "licenses/ui-licenses.txt",
 ]
+
+[default.extend-identifiers]
+Implicits = "Implicits"
 
 [default.extend-words]
 fo = "fo"
