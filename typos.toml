@@ -1,16 +1,39 @@
 [files]
 extend-exclude = [
+  "Makefile",
   "admin/src/main/resources/**",
+  "admin/src/main/scala/com/neu/model/DashboardJsonProtocal.scala",
+  "admin/src/main/scala/com/neu/model/SystemConfig.scala",
+  "admin/src/main/scala/com/neu/model/SystemConfigJsonProtocol.scala",
+  "admin/src/main/scala/com/neu/service/authentication/OpenIdAuthService.scala",
+  "admin/src/main/scala/com/neu/service/dashboard/DashboardService.scala",
   "admin/webapp/websrc/app/common/styles/eos-ds/**",
+  "admin/webapp/websrc/app/common/constants/global.constant.ts",
+  "admin/webapp/websrc/app/common/constants/path.constant.ts",
+  "admin/webapp/websrc/app/common/neuvector-formly/card/card.component.html",
+  "admin/webapp/websrc/app/common/services/response-rules.service.ts",
   "admin/webapp/websrc/app/common/styles/eos-icon/fonts/eos-icons.svg",
   "admin/webapp/websrc/app/common/types/openapi_for_reference_only/**",
   "admin/webapp/websrc/app/common/types/scala_for_reference_only/**",
+  "admin/webapp/websrc/app/core/interceptor/timeout.interceptor.ts",
+  "admin/webapp/websrc/app/routes/components/admission-rules/partial/add-edit-admission-rule-modal/add-edit-admission-rule-modal.component.html",
+  "admin/webapp/websrc/app/routes/components/container-detail/container-detail.component.html",
+  "admin/webapp/websrc/app/routes/components/dlp-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
+  "admin/webapp/websrc/app/routes/components/enforcers-grid/enforcers-grid.component.html",
+  "admin/webapp/websrc/app/routes/components/waf-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
+  "admin/webapp/websrc/app/routes/registries/**",
+  "admin/webapp/websrc/app/routes/security-events/partial/advanced-filter-modal/advanced-filter-modal.service.ts",
+  "admin/webapp/websrc/app/routes/security-events/security-events.component.html",
   "admin/webapp/websrc/assets/i18n/**",
   "admin/webapp/websrc/assets/img/country-flag/**",
   "admin/webapp/websrc/assets/img/dark-theme/sign-in-bg.svg",
   "admin/webapp/websrc/assets/img/sign-in-bg.svg",
+  "admin/test/REST_API/test_shell.sh",
+  "build.sbt",
+  "cli/prog/enforcer.py",
   "java.security",
   "licenses/ui-licenses.txt",
+  "package/Dockerfile",
 ]
 
 [default.extend-identifiers]
@@ -44,40 +67,3 @@ vulnerabilites = "vulnerabilites"
 fo = "fo"
 3DES_EDE_CBC = "3DES_EDE_CBC"
 IST = "IST"
-assemblys = "assemblys"
-buil = "buil"
-CAHCE = "CAHCE"
-comliance = "comliance"
-complaince = "complaince"
-dashbaord = "dashbaord"
-Descrition = "Descrition"
-destory = "destory"
-Diplay = "Diplay"
-effectivelly = "effectivelly"
-enpoint = "enpoint"
-generater = "generater"
-hightlighted = "hightlighted"
-Implict = "Implict"
-initialzation = "initialzation"
-intecepting = "intecepting"
-Mainfest = "Mainfest"
-Nework = "Nework"
-poilcy = "poilcy"
-priviledge = "priviledge"
-Priviledge = "Priviledge"
-protocal = "protocal"
-Refeshing = "Refeshing"
-regestries = "regestries"
-Registy = "Registy"
-registy = "registy"
-Reponse = "Reponse"
-RETRIVE = "RETRIVE"
-Resoureces = "Resoureces"
-secutiry = "secutiry"
-seleceted = "seleceted"
-Slected = "Slected"
-tiemout = "tiemout"
-trimed = "trimed"
-UPGADE = "UPGADE"
-Verion = "Verion"
-vulnerabilies = "vulnerabilies"
