@@ -31,7 +31,7 @@ import com.neu.service.workload.WorkloadService
 import org.apache.pekko.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse }
 import org.apache.pekko.http.scaladsl.server.{ Directives, ExceptionHandler, Route }
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.global
 
 /**
  * The REST API layer. It exposes the REST services, but does not provide any web server

@@ -27,15 +27,15 @@ export interface SystemAlert {
   message: string;
 }
 
-export interface UpgradeVerion {
+export interface UpgradeVersion {
   release_date: Date;
   tag: string;
   version: string;
 }
 
 export interface UpgradeInfo {
-  max_upgrade_version?: UpgradeVerion;
-  min_upgrade_version?: UpgradeVerion;
+  max_upgrade_version?: UpgradeVersion;
+  min_upgrade_version?: UpgradeVersion;
 }
 
 export interface Score {

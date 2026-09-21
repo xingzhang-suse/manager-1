@@ -1,56 +1,10 @@
 [files]
 extend-exclude = [
   "admin/src/main/resources/**",
-  "admin/src/main/scala/com/neu/model/DashboardJsonProtocal.scala",
-  "admin/src/main/scala/com/neu/model/SystemConfig.scala",
-  "admin/src/main/scala/com/neu/model/SystemConfigJsonProtocol.scala",
-  "admin/src/main/scala/com/neu/service/authentication/OpenIdAuthService.scala",
-  "admin/webapp/websrc/app/common/styles/eos-ds/**",
-  "admin/webapp/websrc/app/common/constants/global.constant.ts",
-  "admin/webapp/websrc/app/common/styles/eos-icon/fonts/eos-icons.svg",
-  "admin/webapp/websrc/app/common/types/openapi_for_reference_only/**",
-  "admin/webapp/websrc/app/common/types/scala_for_reference_only/**",
-  "admin/webapp/websrc/app/routes/components/admission-rules/partial/add-edit-admission-rule-modal/add-edit-admission-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/components/dlp-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/components/enforcers-grid/enforcers-grid.component.html",
-  "admin/webapp/websrc/app/routes/components/waf-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/registries/**",
-  "admin/webapp/websrc/app/routes/security-events/partial/advanced-filter-modal/advanced-filter-modal.service.ts",
-  "admin/webapp/websrc/assets/i18n/**",
   "admin/webapp/websrc/assets/img/country-flag/**",
-  "admin/webapp/websrc/assets/img/dark-theme/sign-in-bg.svg",
-  "admin/webapp/websrc/assets/img/sign-in-bg.svg",
-  "cli/prog/enforcer.py",
   "java.security",
   "licenses/ui-licenses.txt",
 ]
-
-[default.extend-identifiers]
-DashboardJsonProtocal = "DashboardJsonProtocal"
-Implicits = "Implicits"
-NO_CAHCE = "NO_CAHCE"
-RETRIVE_BOOTSTRAP_PASSWORD = "RETRIVE_BOOTSTRAP_PASSWORD"
-UpgradeVerion = "UpgradeVerion"
-UPGADE_REQUIRED = "UPGADE_REQUIRED"
-addmission = "addmission"
-childs = "childs"
-comlianceTags = "comlianceTags"
-complainceProfile = "complainceProfile"
-creater_domains = "creater_domains"
-dashbaordDetails = "dashbaordDetails"
-destoryListeners = "destoryListeners"
-displayedDescrition = "displayedDescrition"
-enpointList = "enpointList"
-generaterUserNotifications = "generaterUserNotifications"
-getMainfest = "getMainfest"
-isRefeshing = "isRefeshing"
-prepareImplictNetworkRule = "prepareImplictNetworkRule"
-promoteNeworkRuleOnEntry = "promoteNeworkRuleOnEntry"
-requset = "requset"
-scoreImpovementDialogRef = "scoreImpovementDialogRef"
-squence = "squence"
-trimedUrl = "trimedUrl"
-vulnerabilites = "vulnerabilites"
 
 [default.extend-words]
 fo = "fo"
