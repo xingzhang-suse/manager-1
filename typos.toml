@@ -1,73 +1,83 @@
 [files]
 extend-exclude = [
-  "Makefile",
   "admin/src/main/resources/**",
-  "admin/src/main/scala/com/neu/api/Api.scala",
-  "admin/src/main/scala/com/neu/model/SystemConfig.scala",
-  "admin/src/main/scala/com/neu/model/SystemConfigJsonProtocol.scala",
-  "admin/src/main/scala/com/neu/service/Services.scala",
-  "admin/src/main/scala/com/neu/service/authentication/OpenIdAuthService.scala",
-  "admin/src/main/scala/com/neu/service/dashboard/DashboardService.scala",
-  "admin/src/main/scala/com/neu/service/policy/PolicyService.scala",
-  "admin/src/main/scala/com/neu/model/DashboardJsonProtocal.scala",
-  "admin/test/REST_API/test_shell.sh",
-  "admin/webapp/websrc/app/common/constants/global.constant.ts",
-  "admin/webapp/websrc/app/common/constants/map.constant.ts",
-  "admin/webapp/websrc/app/common/constants/path.constant.ts",
-  "admin/webapp/websrc/app/common/neuvector-formly/card/card.component.html",
-  "admin/webapp/websrc/app/common/services/network-rules.service.ts",
-  "admin/webapp/websrc/app/common/services/response-rules.service.ts",
   "admin/webapp/websrc/app/common/styles/eos-ds/**",
   "admin/webapp/websrc/app/common/styles/eos-icon/fonts/eos-icons.svg",
-  "admin/webapp/websrc/app/common/types/compliance/compliance.ts",
-  "admin/webapp/websrc/app/common/types/compliance/complainceProfile.ts",
-  "admin/webapp/websrc/app/common/types/dashboard/dashboard.ts",
-  "admin/webapp/websrc/app/common/types/groups/groups.ts",
   "admin/webapp/websrc/app/common/types/openapi_for_reference_only/**",
   "admin/webapp/websrc/app/common/types/scala_for_reference_only/**",
-  "admin/webapp/websrc/app/common/types/settings/certificate.ts",
-  "admin/webapp/websrc/app/core/interceptor/timeout.interceptor.ts",
-  "admin/webapp/websrc/app/core/jquery/jquerySupport.js",
-  "admin/webapp/websrc/app/routes/compliance/compliance.filter.service.ts",
-  "admin/webapp/websrc/app/routes/compliance/compliance.service.ts",
-  "admin/webapp/websrc/app/routes/components/admission-rules/partial/add-edit-admission-rule-modal/add-edit-admission-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/components/admission-rules/partial/add-edit-admission-rule-modal/add-edit-admission-rule-modal.component.ts",
-  "admin/webapp/websrc/app/routes/components/container-detail/container-detail.component.html",
-  "admin/webapp/websrc/app/routes/components/dlp-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/components/enforcers-grid/enforcers-grid.component.html",
-  "admin/webapp/websrc/app/routes/components/global-notifications/global-notifications.component.ts",
-  "admin/webapp/websrc/app/routes/components/multi-cluster-grid/multi-cluster-grid-action-cell/multi-cluster-grid-action-cell.component.ts",
-  "admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.ts",
-  "admin/webapp/websrc/app/routes/components/network-rules/partial/action-buttons/action-buttons.component.html",
-  "admin/webapp/websrc/app/routes/components/network-rules/partial/action-buttons/action-buttons.component.ts",
-  "admin/webapp/websrc/app/routes/components/network-rules/partial/add-edit-network-rule-modal/add-edit-network-rule-modal.component.ts",
-  "admin/webapp/websrc/app/routes/components/security-risk-panel/partial/score-instruction/score-instruction.component.ts",
-  "admin/webapp/websrc/app/routes/components/security-risk-panel/security-risk-panel.component.ts",
-  "admin/webapp/websrc/app/routes/components/security-risk-printable-report/risks-view-report/risk-view-report-description-col/risk-view-report-description-col.component.html",
-  "admin/webapp/websrc/app/routes/components/security-risk-printable-report/risks-view-report/risk-view-report-description-col/risk-view-report-description-col.component.ts",
-  "admin/webapp/websrc/app/routes/components/waf-sensors/partial/add-edit-rule-modal/add-edit-rule-modal.component.html",
-  "admin/webapp/websrc/app/routes/dashboard/dashboard.component.ts",
-  "admin/webapp/websrc/app/routes/dashboard/report-by-namespace-modal/report-by-namespace-modal.component.ts",
-  "admin/webapp/websrc/app/routes/pages/login/login.component.html",
-  "admin/webapp/websrc/app/routes/pages/login/login.component.ts",
-  "admin/webapp/websrc/app/routes/registries/**",
-  "admin/webapp/websrc/app/routes/security-events/partial/advanced-filter-modal/advanced-filter-modal.service.ts",
-  "admin/webapp/websrc/app/routes/security-events/partial/review-network-rule-modal/review-network-rule-modal.component.ts",
-  "admin/webapp/websrc/app/routes/security-events/security-events.component.html",
-  "admin/webapp/websrc/app/routes/settings/configuration/config-form/config-form-config/constants/tls-constants.ts",
-  "admin/webapp/websrc/app/routes/vulnerabilities/vulnerabilities.filter.service.ts",
   "admin/webapp/websrc/assets/i18n/**",
   "admin/webapp/websrc/assets/img/country-flag/**",
   "admin/webapp/websrc/assets/img/dark-theme/sign-in-bg.svg",
   "admin/webapp/websrc/assets/img/sign-in-bg.svg",
-  "build.sbt",
-  "cli/prog/enforcer.py",
   "java.security",
   "licenses/ui-licenses.txt",
-  "package/Dockerfile",
 ]
+
+[default.extend-identifiers]
+DashboardJsonProtocal = "DashboardJsonProtocal"
+Implicits = "Implicits"
+NO_CAHCE = "NO_CAHCE"
+RETRIVE_BOOTSTRAP_PASSWORD = "RETRIVE_BOOTSTRAP_PASSWORD"
+UpgradeVerion = "UpgradeVerion"
+UPGADE_REQUIRED = "UPGADE_REQUIRED"
+addmission = "addmission"
+childs = "childs"
+comlianceTags = "comlianceTags"
+complainceProfile = "complainceProfile"
+creater_domains = "creater_domains"
+dashbaordDetails = "dashbaordDetails"
+destoryListeners = "destoryListeners"
+displayedDescrition = "displayedDescrition"
+enpointList = "enpointList"
+generaterUserNotifications = "generaterUserNotifications"
+getMainfest = "getMainfest"
+isRefeshing = "isRefeshing"
+prepareImplictNetworkRule = "prepareImplictNetworkRule"
+promoteNeworkRuleOnEntry = "promoteNeworkRuleOnEntry"
+requset = "requset"
+scoreImpovementDialogRef = "scoreImpovementDialogRef"
+squence = "squence"
+trimedUrl = "trimedUrl"
+vulnerabilites = "vulnerabilites"
 
 [default.extend-words]
 fo = "fo"
 3DES_EDE_CBC = "3DES_EDE_CBC"
 IST = "IST"
+assemblys = "assemblys"
+buil = "buil"
+CAHCE = "CAHCE"
+comliance = "comliance"
+complaince = "complaince"
+dashbaord = "dashbaord"
+Descrition = "Descrition"
+destory = "destory"
+Diplay = "Diplay"
+effectivelly = "effectivelly"
+enpoint = "enpoint"
+generater = "generater"
+hightlighted = "hightlighted"
+Implict = "Implict"
+initialzation = "initialzation"
+intecepting = "intecepting"
+Mainfest = "Mainfest"
+Nework = "Nework"
+poilcy = "poilcy"
+priviledge = "priviledge"
+Priviledge = "Priviledge"
+protocal = "protocal"
+Refeshing = "Refeshing"
+regestries = "regestries"
+Registy = "Registy"
+registy = "registy"
+Reponse = "Reponse"
+RETRIVE = "RETRIVE"
+Resoureces = "Resoureces"
+secutiry = "secutiry"
+seleceted = "seleceted"
+Slected = "Slected"
+tiemout = "tiemout"
+trimed = "trimed"
+UPGADE = "UPGADE"
+Verion = "Verion"
+vulnerabilies = "vulnerabilies"
